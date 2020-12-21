@@ -9,10 +9,11 @@
 	int numarare_stari_as = 0;
 %}
 
+%option stack
 alfabet			[a-z0-9A-Z0-9]+
-states			[a-zA-Z0-9]+
-initial_state 	[a-zA-Z0-9]+
-stack_alphabet 	[a-zA-Z0-9]+
+stare_tranzitie "\t"{alfabet}" -> ("
+concatenare		[&]?
+stiva 			{alfabet}{concatenare}{alfabet}
 
 %x GRAMATICA
 %x AUTOMAT
@@ -28,7 +29,7 @@ stack_alphabet 	[a-zA-Z0-9]+
 %x ALFABET_STIVA
 %x STARE_INITIALA_AS
 %x STARI_FINALE_AS
-%x TRANZITII_AS
+%x TRANZITIE_AS
 %x NUMARARE_STARI
 
 %%
@@ -92,6 +93,15 @@ stack_alphabet 	[a-zA-Z0-9]+
 <ALFABET_STIVA>{alfabet}" "			{ yyless(yyleng - 1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 <ALFABET_STIVA>\n					{ BEGIN(AUTOMAT); }
 <ALFABET_STIVA>.					{ }
+
+<AUTOMAT>{stare_tranzitie}			{ BEGIN(TRANZITIE_AS); printf("Functia de tranzitie:\n"); yyless(1); }
+<TRANZITIE_AS>{alfabet}", "			{ printf("%s", yytext); }
+<TRANZITIE_AS>{alfabet}" /"			{ yyless(yyleng - 2); printf("%s) = (", yytext); }
+<TRANZITIE_AS>{alfabet}				{ printf("\tm(%s, ", yytext); }
+<TRANZITIE_AS>"/ "{stiva}			{ yy_push_state(TRANZITIE_AS); }
+<TRANZITIE_AS>" -> "{alfabet}		{ printf("%s, ", yytext); yy_pop_state(); printf("%s)", yytext); }
+
+<TRANZITIE_AS>.|\n					{ }
 
 <AUTOMAT>.|\n   { }
 
