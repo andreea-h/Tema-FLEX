@@ -1,0 +1,80 @@
+variable y ::= { a, b, c } ;
+
+automata1 ::= PushDownAutomata (
+	alphabet :: { a, b, c, d } ;
+	stack_alphabet :: { Z0, X } ;
+	states :: { q0, q1, q2, q3, q4 } ;
+	final_states :: { q0 } ;
+	initial_state :: q0 ;
+	variable y ::= { a, b } ;
+	
+	q0 -> (
+		y, z0 / X&Z0 -> q1 ;
+	) ;
+	
+	q1 -> (
+		a, X / X&X -> q1 ;
+		b, X / e -> q2 ;
+	) ;
+	
+	q2 -> (
+		b, X / e -> q2 ;
+		c, Z0 / X&Z0 -> q3 ;
+	) ;
+	
+	q3 -> (
+		c, X / X&X -> q3 ;
+		d, X / e -> q4 ;
+	) ;
+	
+	q4 -> (
+		d, X / e -> q4 ;
+		e, Z0 / Z0 -> q4 ;
+	) ;
+) ;;
+
+% X&Y reprezinta o notatie pentru X concatenat cu Y
+automata5 ::= PushDownAutomata (
+	alphabet :: { a, b } ;
+	states :: { q0 } ;
+	initial_state :: q0 ;
+	stack_alphabet :: { Z0, 0, 1 } ;
+
+	q0 -> (
+		a, Z0 / 0&Z0 -> q0 ;
+		b, Z0 / 1&Z0 -> q0 ;
+		a, 0 / 0&0 -> q0 ;
+		b, 0 / e -> q0 ;
+		b, 1 / 1&1 -> q0 ;
+		a, 1 / e -> q0 ;
+		e, Z0 / e -> q0 ;
+	) ;
+) ;;
+
+grammar1 ::= Grammar (
+	nonterminals :: { S, S1, S2 } ;
+	alphabet :: { a, b, c, d } ;
+	start_symbol :: S ;
+
+	S -> a&S | b&S | a&S1 ;
+	S1 -> b&S2 | e ;
+	S2 -> a&S2 | aa ;	
+) ;;
+
+/*
+Acesta este un comentariu
+scris pe mai multe randuri
+si va trebui sa fie ignorat!
+Atentie: Daca vom avea definitii comentate atunci ele vor fi ignorate!
+*/
+
+grammar2 ::= Grammar (
+	alphabet :: { a, b } ;
+	nonterminals :: { S, S1 } ;
+	start_symbol :: S ;
+
+	S -> a&S&a | b&S&b | S1 ;
+	S1 -> a&S1 | b&S1 | e ;
+) ;;
+
+
