@@ -1,18 +1,21 @@
+	/*student: Horovei Andreea-Georgiana, 335CC*/
 %{ 
 	#include<stdio.h>
 	#include<string.h>
 	int max_chars = 200;
 	char* grammar = " ::= Grammar";
 	char* automat = " ::= PushDownAutomata";
+	char* stiva;
 	char* name;
 	int counter = 0;
 	int numarare_stari_as = 0;
 %}
 
 %option stack
+%option 8bit full
 alfabet			[a-z0-9A-Z0-9]+
 stare_tranzitie "\t"{alfabet}" -> ("
-concatenare		[&]?
+concatenare		&?
 stiva 			{alfabet}{concatenare}{alfabet}
 
 %x GRAMATICA
@@ -31,6 +34,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 %x STARI_FINALE_AS
 %x TRANZITIE_AS
 %x NUMARARE_STARI
+%x STIVA
 
 %%
 <INITIAL>\n\n		{ BEGIN(GASESTE_NUME); }	
@@ -95,12 +99,13 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <ALFABET_STIVA>.					{ }
 
 <AUTOMAT>{stare_tranzitie}			{ BEGIN(TRANZITIE_AS); printf("Functia de tranzitie:\n"); yyless(1); }
+<TRANZITIE_AS>{alfabet}" -> ("		{ yyless(yyleng - 5); printf("\tm(%s, ", yytext); }
 <TRANZITIE_AS>{alfabet}", "			{ printf("%s", yytext); }
-<TRANZITIE_AS>{alfabet}" /"			{ yyless(yyleng - 2); printf("%s) = (", yytext); }
-<TRANZITIE_AS>{alfabet}				{ printf("\tm(%s, ", yytext); }
-<TRANZITIE_AS>"/ "{stiva}			{ yy_push_state(TRANZITIE_AS); }
-<TRANZITIE_AS>" -> "{alfabet}		{ printf("%s, ", yytext); yy_pop_state(); printf("%s)", yytext); }
-
+<TRANZITIE_AS>{alfabet}" / " 		{ yyless(yyleng - 3); printf("%s) = ", yytext); }
+<TRANZITIE_AS>{stiva}" -> " 		{ yyless(yyleng - 4);
+									  stiva = (char *)malloc(100 * sizeof(char));
+									  strcpy(stiva, yytext); }
+<TRANZITIE_AS>{alfabet}" ;\n"		{ yyless(yyleng - 3); printf("(%s, ", yytext); printf("%s)\n", stiva); }
 <TRANZITIE_AS>.|\n					{ }
 
 <AUTOMAT>.|\n   { }
@@ -116,6 +121,7 @@ int main(int argc, char** argv){
 	yyin = fopen(argv[1], "r");
 	yylex();
 	
+	printf("caca: %d", counter);
 	
 	return 0;
 }
