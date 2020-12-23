@@ -8,6 +8,7 @@
 	char* stiva; /*retine ce trebuie pus pe stiva la o tranzitie*/
 	char* stare; /*retine starea curenta pentru care se face scrierea unei tranzitii*/
 	char* name;
+	int afisare_tranzitii; /*are valoarea 1 daca s-a afisat deja mesajul "Functia de tranzitie: ", altfel este 0*/
 	int counter = 0;
 	int numarare_stari_as = 0;
 %}
@@ -47,19 +48,16 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <INITIAL>.|%		{ }
 
 
-<GASESTE_NUME>" ::= Grammar (\n"  		{ name = (char *)malloc(max_chars * sizeof(char));
-										  strcpy(name, yytext);
-										  name[strlen(name) - 15] = '\0';	
-										  printf("Numele gramaticii: %s\n", name); 
-										  BEGIN(GRAMATICA); }
+<GASESTE_NUME>" ::= Grammar (\n"  			{ yyless(yyleng - strlen(" ::= Grammar (\n"));
+										  	  printf("Numele gramaticii: %s\n", yytext); 
+										  	  BEGIN(GRAMATICA); }
 										  
-<GASESTE_NUME>" ::= PushDownAutomata (\n"	{ name = (char *)malloc(max_chars * sizeof(char));
-										  	strcpy(name, yytext);
-										 	name[strlen(name) - 24] = '\0';	
-										  	printf("Numele automatului: %s\n", name); 
-										  	BEGIN(AUTOMAT); }
+<GASESTE_NUME>" ::= PushDownAutomata (\n"	{ yyless(yyleng - strlen(" ::= PushDownAutomata (\n"));
+										  	  printf("Numele automatului: %s\n", yytext); 
+										  	  BEGIN(AUTOMAT); }
 <GASESTE_NUME>"% "			{ }
 <GASESTE_NUME>\n			{ }
+	/*oricare alte caractere analizata in aceasta stare alcatuiesc numele cautat si sunt memorate*/
 <GASESTE_NUME>.				{ yymore(); }
 
 
@@ -103,9 +101,15 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <ALFABET_STIVA>.					{ }
 
 	/*este identificat inceputul definirii functiilor de tranzitie, sirul pe care s-a facut match va fi reanalizat mai departe*/
-<AUTOMAT>{stare_tranzitie}			{ BEGIN(DEFINIRE_TRANZITII); printf("Functia de tranzitie:\n"); yyless(0); }
+<AUTOMAT>{stare_tranzitie}			{ BEGIN(DEFINIRE_TRANZITII); 
+									  if (afisare_tranzitii == 0) {
+									  	printf("Functia de tranzitie:\n");
+									  	afisare_tranzitii = 1;
+									  }  
+									  yyless(0);
+									}
 	
-<DEFINIRE_TRANZITII>{alfabet}" -> ("		{ yyless(yyleng - 5); printf("\tm(%s, ", yytext); stare = strdup(yytext); BEGIN(TRANZITIE_AS); }
+<DEFINIRE_TRANZITII>{alfabet}" -> (" { yyless(yyleng - 5); printf("\tm(%s, ", yytext); stare = strdup(yytext); BEGIN(TRANZITIE_AS); }
 	/*regula care se aplica cand sunt definite mai multe tranzitii pentru aceeasi stare*/
 <DEFINIRE_TRANZITII>{alfabet}		{ printf("\tm(%s, ", stare); 
 									  BEGIN(TRANZITIE_AS); yyless(0); }
@@ -117,16 +121,16 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <TRANZITIE_AS>"e -> "				{ yyless(yyleng - 4);
 									  stiva = strdup(yytext); }	
 	/*este identificata starea urmatoare dintr-o tranzitie*/	
-	/* s-a incheiat scrierea unei tranzitii*/								  								  	
+	/*s-a incheiat scrierea unei tranzitii*/								  								  	
 <TRANZITIE_AS>{alfabet}" ;\n"		{ yyless(yyleng - 3); 
 									  printf("(%s, ", yytext); 
 									  printf("%s)\n", stiva); 
 									  BEGIN(DEFINIRE_TRANZITII); }
 	/*este identificat finalul definitiei unei tranzitii*/
-<TRANZITIE_AS>"\t) ;\n"				{ BEGIN(DEFINIRE_TRANZITII); }
+<DEFINIRE_TRANZITII>"\t) ;\n"		{ BEGIN(AUTOMAT); }
 <TRANZITIE_AS>.|\n					{ }
 
-	/*daca din oricare dintre stari se gaseste /*, trebuie ignoram tot continutul comentariului*/
+	/*daca din oricare dintre stari se gaseste /*, trebuie sa ignoram tot continutul comentariului*/
 <*>"/*"								{ int before_comment_state = YYSTATE;
 							          yy_push_state(before_comment_state);
 									  BEGIN(COMENTARIU); }
@@ -135,7 +139,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 	/*s-a identificat finalul comenatiului si se revine la starea de dinainte de gasirea comentariului*/
 <COMENTARIU>"*/\n"					{ yy_pop_state(); }
 
-<*>") ;;"							{ BEGIN(INITIAL); numarare_stari_as = 0; printf("\n"); }
+<*>") ;;"							{ BEGIN(INITIAL); numarare_stari_as = 0; afisare_tranzitii = 0; printf("\n"); }
 
 <AUTOMAT>.|\n   { }
 
@@ -152,6 +156,6 @@ int main(int argc, char** argv){
 	yylex();
 	
 	
-	
+	printf("%d\n", counter);
 	return 0;
 }
