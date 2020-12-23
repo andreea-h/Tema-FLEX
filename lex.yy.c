@@ -737,7 +737,7 @@ char *yytext;
 	char* variabile[MAX_VARIABLES];
 	int nr_variabile; /*retine dimensiunea pentru vectorul de variabile*/
 	
-	char* valori_variabile[MAX_VARIABLES][2]; /*memoreaza asocierile variabila - valoare gasite in fisier*/
+	char* valori_variabile[MAX_VARIABLES][2]; /*memoreaza asocierile  - valoare gasite in fisier*/
 	int nr_valori; /*retine numarul de asocieri valori-variabile identificate in cadrul analizei*/
 	char* variabila_curenta; /*retine variabila curenta pentru care se memoreaza valorile*/
 	
@@ -751,6 +751,7 @@ char *yytext;
 	int nr_valori_interne; /*retine numarul de asocieri valori-variabile identificate in cadrul analizei*/
 	bool variabila_interna = false; /*devine true daca se face memorarea variabilei ca varibila interna*/
 
+	char* variabila_tranzitie; /*retine valoarea unei variabile identificata in definitia unui AS/unei gramatici*/
 
 	/*primeste un simbol si intoarce 1 daca simbolul respectiv este memorat ca variabila globala*/
 	int verifica_variabila_globala(char* simbol) { 
@@ -776,9 +777,9 @@ char *yytext;
 	
 	char* copie_tranzitie1; /*memoreaza o copie a tranzitiei pentru a face afisarea la explicitarea varibilelor*/
 	char* copie_tranzitie2;
-#line 780 "lex.yy.c"
+#line 781 "lex.yy.c"
 
-#line 782 "lex.yy.c"
+#line 783 "lex.yy.c"
 
 #define INITIAL 0
 #define GRAMATICA 1
@@ -1022,12 +1023,12 @@ YY_DECL
 		}
 
 	{
-#line 96 "program.l"
+#line 97 "program.l"
 
-#line 98 "program.l"
+#line 99 "program.l"
 						  
 	/*s-a gasit o variabila in starea INITIAL, se va memora ca variabila gloabal impreuna cu valorile asociate acesteia*/									  	
-#line 1031 "lex.yy.c"
+#line 1032 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1092,7 +1093,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 100 "program.l"
+#line 101 "program.l"
 { int before_variable_state = YYSTATE;
 							          		  yy_push_state(before_variable_state);
 							          		  BEGIN(MEMORARE_VARIABILE); }	
@@ -1100,7 +1101,7 @@ YY_RULE_SETUP
 /*s-a gasit o variabila intr-una dintre starile AUTOMAT/GRAMATICA, se va memora ca variabila interna*/									  	
 case 2:
 YY_RULE_SETUP
-#line 104 "program.l"
+#line 105 "program.l"
 { int before_variable_state = YYSTATE;
 							          		  yy_push_state(before_variable_state);
 							          		  BEGIN(MEMORARE_VARIABILE);
@@ -1108,9 +1109,9 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 109 "program.l"
+#line 110 "program.l"
 { yyless(yyleng - strlen(" ::= {")); 
-											  if (variabila_interna == true) {
+											  if (variabila_interna == true) { /*variabila gasita trebuie memorata ca variabila interna*/
 											  	variabile_interne[nr_variabile_interne++] = strdup(yytext);
 												variabila_curenta = strdup(yytext);
 										      }
@@ -1122,7 +1123,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 120 "program.l"
+#line 121 "program.l"
 { if (variabila_interna == false) {
 												  valori_variabile[nr_valori][0] = strdup(variabila_curenta);
 												  valori_variabile[nr_valori][1] = strdup(yytext);
@@ -1138,36 +1139,36 @@ YY_RULE_SETUP
 /*s-a identificat finalul definirii unei varibile*/									      	  
 case 5:
 YY_RULE_SETUP
-#line 132 "program.l"
+#line 133 "program.l"
 { yy_pop_state(); variabila_interna = false; }					  
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 133 "program.l"
+#line 134 "program.l"
 { }				
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 139 "program.l"
+#line 140 "program.l"
 { BEGIN(GASESTE_NUME); }	
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 141 "program.l"
+#line 142 "program.l"
 { }	
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 142 "program.l"
+#line 143 "program.l"
 { yymore(); }
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 145 "program.l"
+#line 146 "program.l"
 { yyless(yyleng - strlen(" ::= Grammar (\n"));
 										  	  printf("Numele gramaticii: %s\n", yytext); 
 										  	  BEGIN(GRAMATICA); }
@@ -1175,7 +1176,7 @@ YY_RULE_SETUP
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 149 "program.l"
+#line 150 "program.l"
 { yyless(yyleng - strlen(" ::= PushDownAutomata (\n"));
 										  	  		  printf("Numele automatului: %s\n", yytext); 
 										  	  		  afisare_automat = true;
@@ -1183,179 +1184,179 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 153 "program.l"
+#line 154 "program.l"
 { }
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 154 "program.l"
+#line 155 "program.l"
 { }
 	YY_BREAK
 /*oricare alte caractere analizata in aceasta stare alcatuiesc numele cautat si sunt memorate*/
 case 14:
 YY_RULE_SETUP
-#line 156 "program.l"
+#line 157 "program.l"
 { yymore(); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 159 "program.l"
+#line 160 "program.l"
 { BEGIN(ALFABET_GRAMATICA); printf("Alfabetul gramaticii: {"); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 160 "program.l"
+#line 161 "program.l"
 { printf("%s, ", yytext); } 
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 161 "program.l"
+#line 162 "program.l"
 { yyless(1); printf("%s}\n", yytext); BEGIN(GRAMATICA); } 
 	YY_BREAK
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-#line 162 "program.l"
+#line 163 "program.l"
 { BEGIN(GRAMATICA); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 163 "program.l"
+#line 164 "program.l"
 { }
 	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-#line 165 "program.l"
+#line 166 "program.l"
 { }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 168 "program.l"
+#line 169 "program.l"
 { BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {"); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 169 "program.l"
+#line 170 "program.l"
 { printf("%s, ", yytext); } 
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 170 "program.l"
+#line 171 "program.l"
 { yyless(1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
-#line 171 "program.l"
+#line 172 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 172 "program.l"
+#line 173 "program.l"
 { }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 174 "program.l"
+#line 175 "program.l"
 { BEGIN(NUMARARE_STARI); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 175 "program.l"
+#line 176 "program.l"
 { numarare_stari_as++; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 176 "program.l"
+#line 177 "program.l"
 { printf("Numarul de stari: %d\n", numarare_stari_as); 			
 									  BEGIN(AUTOMAT); }
 	YY_BREAK
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 178 "program.l"
+#line 179 "program.l"
 { }									  
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 181 "program.l"
+#line 182 "program.l"
 { printf("Starea initiala: "); BEGIN(STARE_INITIALA_AS); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 182 "program.l"
+#line 183 "program.l"
 { printf("%s\n", yytext); }
 	YY_BREAK
 case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
-#line 183 "program.l"
+#line 184 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 184 "program.l"
+#line 185 "program.l"
 { }
 	YY_BREAK
 /*s-a identificat definitia starilor finale la AS*/
 case 34:
 YY_RULE_SETUP
-#line 187 "program.l"
+#line 188 "program.l"
 { BEGIN(STARI_FINALE_AS); printf("Starile finale: {"); stari_finale = true; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 188 "program.l"
+#line 189 "program.l"
 { printf("%s, ", yytext); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 189 "program.l"
+#line 190 "program.l"
 { yyless(yyleng - 1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 190 "program.l"
+#line 191 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 191 "program.l"
+#line 192 "program.l"
 { }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 193 "program.l"
+#line 194 "program.l"
 { BEGIN(ALFABET_STIVA); printf("Alfabetul stivei: {"); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 194 "program.l"
+#line 195 "program.l"
 { printf("%s, ", yytext); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 195 "program.l"
+#line 196 "program.l"
 { yyless(yyleng - 1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 196 "program.l"
+#line 197 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 197 "program.l"
+#line 198 "program.l"
 { }
 	YY_BREAK
 /*este identificat inceputul definirii functiilor de tranzitie, sirul pe care s-a facut match va fi reanalizat mai departe*/
 case 44:
 YY_RULE_SETUP
-#line 200 "program.l"
+#line 201 "program.l"
 { BEGIN(DEFINIRE_TRANZITII); 
 									  if (afisare_tranzitii == 0) {
 									  	printf("Functia de tranzitie:\n");
@@ -1366,7 +1367,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 208 "program.l"
+#line 209 "program.l"
 { yyless(yyleng - 5); printf("\tm(%s, ", yytext); stare = strdup(yytext); BEGIN(TRANZITIE_AS);
 									   copie_tranzitie1 = (char*)malloc(150 * sizeof(char)); 
 									   sprintf(copie_tranzitie1, "\tm(%s, ", yytext); /*este memorat string-ul aferent tranzitiei curente*/
@@ -1375,45 +1376,48 @@ YY_RULE_SETUP
 /*regula care se aplica cand sunt definite mai multe tranzitii pentru aceeasi stare*/
 case 46:
 YY_RULE_SETUP
-#line 213 "program.l"
+#line 214 "program.l"
 { printf("\tm(%s, ", stare); 
 									  BEGIN(TRANZITIE_AS); yyless(0); }
 	YY_BREAK
 case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
-#line 215 "program.l"
+#line 216 "program.l"
 { }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 216 "program.l"
-{ yyless(yyleng - 2);//char* simbol = strdup(yytext);
-									  //simbol[strlen(simbol) - 2] = '\0';
+#line 217 "program.l"
+{ yyless(yyleng - 2);
+									  /*verifica daca simbolul analizat este variabila globala*/
 									  if (verifica_variabila_globala(yytext) == 0) {
 									  	printf("%s, ", yytext);
 									  }
 									  else { /*este afisata prima valoare pe care o are asociata variabila globala*/
 									  	printf("%s, ", valori_variabile[prima_aparitie(yytext)][1]);
+									  	variabila_tranzitie = strdup(yytext);
 									  }
 									}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 225 "program.l"
-{ yyless(yyleng - 3); printf("%s) = ", yytext); char* aux = (char*)malloc(100 * sizeof(char)); sprintf(aux, "%s) = ", yytext);
+#line 227 "program.l"
+{ yyless(yyleng - 3); printf("%s) = ", yytext); 
+									  char* aux = (char*)malloc(100 * sizeof(char)); 
+									  sprintf(aux, "%s) = ", yytext);
 									  copie_tranzitie2 = strdup(aux);
 									}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 228 "program.l"
+#line 232 "program.l"
 { yyless(yyleng - 4);
 									  stiva = strdup(yytext); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 230 "program.l"
+#line 234 "program.l"
 { yyless(yyleng - 4);
 									  stiva = strdup(yytext); }	
 	YY_BREAK
@@ -1422,7 +1426,7 @@ YY_RULE_SETUP
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 234 "program.l"
+#line 238 "program.l"
 { yyless(yyleng - 3); 
 									  printf("(%s, ", yytext); 
 									  char* aux1 = (char*)malloc(100 * sizeof(char)); sprintf(aux1, "(%s, ", yytext);
@@ -1431,26 +1435,43 @@ YY_RULE_SETUP
 									  char* aux2 = (char*)malloc(100 * sizeof(char)); sprintf(aux2, "%s)\n", stiva);
 									  copie_tranzitie2 = strcat(copie_tranzitie2, aux2);
 									  int i;
-									  printf("%s %s", copie_tranzitie1, copie_tranzitie2);
+	/*daca anterior s-a identificat o variabila care trebuie extinsa, vor fi afisate si tranzitiile coresp. celorlalte valori ale variabilei*/
+									  if (variabila_tranzitie != NULL) {
+									  	int i;
+									  	/*prima valoare asociata a fost deja afisata la identificarea variabilei*/
+									  	int first = -1;
+									  	for (i = 0; i < nr_valori; i++) {
+											if (strcmp(valori_variabile[i][0], variabila_tranzitie) == 0) {
+												if (first == -1) {
+													first = i;
+												}
+												if (i != first) {
+													printf("%s%s, %s", copie_tranzitie1, valori_variabile[i][1], copie_tranzitie2);
+												}
+											}
+										}
+									  	free(variabila_tranzitie);
+									  	variabila_tranzitie = NULL;
+									  }
 									  BEGIN(DEFINIRE_TRANZITII); }
 	YY_BREAK
 /*este identificat finalul definitiei unei tranzitii*/
 case 53:
 /* rule 53 can match eol */
 YY_RULE_SETUP
-#line 245 "program.l"
+#line 266 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 246 "program.l"
+#line 267 "program.l"
 { }
 	YY_BREAK
 /*daca din oricare dintre stari se gaseste /*, trebuie sa ignoram tot continutul comentariului*/
 case 55:
 YY_RULE_SETUP
-#line 249 "program.l"
+#line 270 "program.l"
 { int before_comment_state = YYSTATE;
 							          yy_push_state(before_comment_state);
 									  BEGIN(COMENTARIU); }
@@ -1459,14 +1480,14 @@ YY_RULE_SETUP
 case 56:
 /* rule 56 can match eol */
 YY_RULE_SETUP
-#line 253 "program.l"
+#line 274 "program.l"
 {  }
 	YY_BREAK
 /*s-a identificat finalul comentariului si se revine la starea de dinainte de gasirea comentariului*/
 case 57:
 /* rule 57 can match eol */
 YY_RULE_SETUP
-#line 255 "program.l"
+#line 276 "program.l"
 { yy_pop_state(); }
 	YY_BREAK
 /*s-a identificat finalul definitiei unui automat sau a unei gramatici*/
@@ -1474,7 +1495,7 @@ YY_RULE_SETUP
 /*daca nu au fost define stari finale, se va afisa mesajul aferent cand multimea starilor finale este vida*/
 case 58:
 YY_RULE_SETUP
-#line 259 "program.l"
+#line 280 "program.l"
 { if (afisare_automat == true && stari_finale == false) {
 									  	printf("Starile finale: {}\n");
 								      }
@@ -1488,15 +1509,15 @@ YY_RULE_SETUP
 case 59:
 /* rule 59 can match eol */
 YY_RULE_SETUP
-#line 269 "program.l"
+#line 290 "program.l"
 { }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 272 "program.l"
+#line 293 "program.l"
 ECHO;
 	YY_BREAK
-#line 1500 "lex.yy.c"
+#line 1521 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(GRAMATICA):
 case YY_STATE_EOF(AUTOMAT):
@@ -2564,7 +2585,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 272 "program.l"
+#line 293 "program.l"
 
 
 	/*analiza se face dintr-un singur fisier*/

@@ -16,7 +16,7 @@ automata5 ::= PushDownAutomata (
 		b, 0 / e -> q0 ;
 		b, 1 / 1&1 -> q0 ;
 		a, 1 / e -> q0 ;
-		e, Z0 / e -> q0 ;
+		y, Z0 / e -> q0 ;
 	) ;
 	
 	/*
@@ -48,7 +48,7 @@ automata5 ::= PushDownAutomata (
 		a, Z0 / 0&Z0 -> q0 ;
 		b, Z0 / 1&Z0 -> q0 ;
 		a, 0 / 0&0 -> q0 ;
-		b, 0 / e -> q0 ;
+		y, 0 / e -> q0 ;
 		b, 1 / 1&1 -> q0 ;
 		a, 1 / e -> q0 ;
 		e, Z0 / e -> q0 ;

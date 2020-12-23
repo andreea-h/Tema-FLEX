@@ -22,7 +22,7 @@
 	char* variabile[MAX_VARIABLES];
 	int nr_variabile; /*retine dimensiunea pentru vectorul de variabile*/
 	
-	char* valori_variabile[MAX_VARIABLES][2]; /*memoreaza asocierile variabila - valoare gasite in fisier*/
+	char* valori_variabile[MAX_VARIABLES][2]; /*memoreaza asocierile  - valoare gasite in fisier*/
 	int nr_valori; /*retine numarul de asocieri valori-variabile identificate in cadrul analizei*/
 	char* variabila_curenta; /*retine variabila curenta pentru care se memoreaza valorile*/
 	
@@ -36,6 +36,7 @@
 	int nr_valori_interne; /*retine numarul de asocieri valori-variabile identificate in cadrul analizei*/
 	bool variabila_interna = false; /*devine true daca se face memorarea variabilei ca varibila interna*/
 
+	char* variabila_tranzitie; /*retine valoarea unei variabile identificata in definitia unui AS/unei gramatici*/
 
 	/*primeste un simbol si intoarce 1 daca simbolul respectiv este memorat ca variabila globala*/
 	int verifica_variabila_globala(char* simbol) { 
@@ -106,7 +107,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 							          		  variabila_interna = true; }							          		  
 							          		  
 <MEMORARE_VARIABILE>{alfabet}" ::= {" 		{ yyless(yyleng - strlen(" ::= {")); 
-											  if (variabila_interna == true) {
+											  if (variabila_interna == true) { /*variabila gasita trebuie memorata ca variabila interna*/
 											  	variabile_interne[nr_variabile_interne++] = strdup(yytext);
 												variabila_curenta = strdup(yytext);
 										      }
@@ -212,16 +213,19 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <DEFINIRE_TRANZITII>{alfabet}		{ printf("\tm(%s, ", stare); 
 									  BEGIN(TRANZITIE_AS); yyless(0); }
 <DEFINIRE_TRANZITII>.|\n			{ }
-<TRANZITIE_AS>{alfabet}", "			{ yyless(yyleng - 2);//char* simbol = strdup(yytext);
-									  //simbol[strlen(simbol) - 2] = '\0';
+<TRANZITIE_AS>{alfabet}", "			{ yyless(yyleng - 2);
+									  /*verifica daca simbolul analizat este variabila globala*/
 									  if (verifica_variabila_globala(yytext) == 0) {
 									  	printf("%s, ", yytext);
 									  }
 									  else { /*este afisata prima valoare pe care o are asociata variabila globala*/
 									  	printf("%s, ", valori_variabile[prima_aparitie(yytext)][1]);
+									  	variabila_tranzitie = strdup(yytext);
 									  }
 									}
-<TRANZITIE_AS>{alfabet}" / " 		{ yyless(yyleng - 3); printf("%s) = ", yytext); char* aux = (char*)malloc(100 * sizeof(char)); sprintf(aux, "%s) = ", yytext);
+<TRANZITIE_AS>{alfabet}" / " 		{ yyless(yyleng - 3); printf("%s) = ", yytext); 
+									  char* aux = (char*)malloc(100 * sizeof(char)); 
+									  sprintf(aux, "%s) = ", yytext);
 									  copie_tranzitie2 = strdup(aux);
 									}
 <TRANZITIE_AS>{stiva}" -> "			{ yyless(yyleng - 4);
@@ -238,8 +242,24 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  char* aux2 = (char*)malloc(100 * sizeof(char)); sprintf(aux2, "%s)\n", stiva);
 									  copie_tranzitie2 = strcat(copie_tranzitie2, aux2);
 									  int i;
-									  /*daca exista o variabila care are asociate mai multe valori*/
-									  printf("%s %s", copie_tranzitie1, copie_tranzitie2);
+	/*daca anterior s-a identificat o variabila care trebuie extinsa, vor fi afisate si tranzitiile coresp. celorlalte valori ale variabilei*/
+									  if (variabila_tranzitie != NULL) {
+									  	int i;
+									  	/*prima valoare asociata a fost deja afisata la identificarea variabilei*/
+									  	int first = -1;
+									  	for (i = 0; i < nr_valori; i++) {
+											if (strcmp(valori_variabile[i][0], variabila_tranzitie) == 0) {
+												if (first == -1) {
+													first = i;
+												}
+												if (i != first) {
+													printf("%s%s, %s", copie_tranzitie1, valori_variabile[i][1], copie_tranzitie2);
+												}
+											}
+										}
+									  	free(variabila_tranzitie);
+									  	variabila_tranzitie = NULL;
+									  }
 									  BEGIN(DEFINIRE_TRANZITII); }
 	/*este identificat finalul definitiei unei tranzitii*/
 <DEFINIRE_TRANZITII>"\t) ;\n"		{ BEGIN(AUTOMAT); }
