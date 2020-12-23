@@ -38,7 +38,7 @@
 
 
 	/*primeste un simbol si intoarce 1 daca simbolul respectiv este memorat ca variabila globala*/
-	int verifica_variabila_glolaba(char* simbol) { 
+	int verifica_variabila_globala(char* simbol) { 
 		int i;
 		for (i = 0; i < nr_variabile; i++) { 
 			if (strcmp(simbol, variabile[i]) == 0) {
@@ -48,6 +48,19 @@
 		return 0;
 	} 
 	
+	/*intoarce indicele primei aparitii a varibilei in vectorul de valori asociate varibilelor globale*/
+	int prima_aparitie(char* simbol) {
+		int i;
+		for (i = 0; i < nr_valori; i++) {
+			if (strcmp(valori_variabile[i][0], simbol) == 0) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	char* copie_tranzitie1; /*memoreaza o copie a tranzitiei pentru a face afisarea la explicitarea varibilelor*/
+	char* copie_tranzitie2;
 %}
 
 %option stack
@@ -133,13 +146,13 @@ stiva 			{alfabet}{concatenare}{alfabet}
 										  	  BEGIN(GRAMATICA); }
 										  
 <GASESTE_NUME,INITIAL>" ::= PushDownAutomata (\n"	{ yyless(yyleng - strlen(" ::= PushDownAutomata (\n"));
-										  	  		printf("Numele automatului: %s\n", yytext); 
-										  	  		afisare_automat = true;
-										  	  		BEGIN(AUTOMAT); }
+										  	  		  printf("Numele automatului: %s\n", yytext); 
+										  	  		  afisare_automat = true;
+										  	  		  BEGIN(AUTOMAT); }
 <GASESTE_NUME>"% "			{ }
 <GASESTE_NUME>\n			{ }
 	/*oricare alte caractere analizata in aceasta stare alcatuiesc numele cautat si sunt memorate*/
-<GASESTE_NUME>.				{ yymore(); }
+<GASESTE_NUME>.						{ yymore(); }
 
 
 <GRAMATICA>"alphabet :: "			{ BEGIN(ALFABET_GRAMATICA); printf("Alfabetul gramaticii: {"); }
@@ -191,13 +204,26 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  yyless(0);
 									}
 	
-<DEFINIRE_TRANZITII>{alfabet}" -> (" { yyless(yyleng - 5); printf("\tm(%s, ", yytext); stare = strdup(yytext); BEGIN(TRANZITIE_AS); }
+<DEFINIRE_TRANZITII>{alfabet}" -> (" { yyless(yyleng - 5); printf("\tm(%s, ", yytext); stare = strdup(yytext); BEGIN(TRANZITIE_AS);
+									   copie_tranzitie1 = (char*)malloc(150 * sizeof(char)); 
+									   sprintf(copie_tranzitie1, "\tm(%s, ", yytext); /*este memorat string-ul aferent tranzitiei curente*/
+									 }
 	/*regula care se aplica cand sunt definite mai multe tranzitii pentru aceeasi stare*/
 <DEFINIRE_TRANZITII>{alfabet}		{ printf("\tm(%s, ", stare); 
 									  BEGIN(TRANZITIE_AS); yyless(0); }
 <DEFINIRE_TRANZITII>.|\n			{ }
-<TRANZITIE_AS>{alfabet}", "			{ printf("%s", yytext); }
-<TRANZITIE_AS>{alfabet}" / " 		{ yyless(yyleng - 3); printf("%s) = ", yytext); }
+<TRANZITIE_AS>{alfabet}", "			{ yyless(yyleng - 2);//char* simbol = strdup(yytext);
+									  //simbol[strlen(simbol) - 2] = '\0';
+									  if (verifica_variabila_globala(yytext) == 0) {
+									  	printf("%s, ", yytext);
+									  }
+									  else { /*este afisata prima valoare pe care o are asociata variabila globala*/
+									  	printf("%s, ", valori_variabile[prima_aparitie(yytext)][1]);
+									  }
+									}
+<TRANZITIE_AS>{alfabet}" / " 		{ yyless(yyleng - 3); printf("%s) = ", yytext); char* aux = (char*)malloc(100 * sizeof(char)); sprintf(aux, "%s) = ", yytext);
+									  copie_tranzitie2 = strdup(aux);
+									}
 <TRANZITIE_AS>{stiva}" -> "			{ yyless(yyleng - 4);
 									  stiva = strdup(yytext); }
 <TRANZITIE_AS>"e -> "				{ yyless(yyleng - 4);
@@ -206,7 +232,14 @@ stiva 			{alfabet}{concatenare}{alfabet}
 	/*s-a incheiat scrierea unei tranzitii*/								  								  	
 <TRANZITIE_AS>{alfabet}" ;\n"		{ yyless(yyleng - 3); 
 									  printf("(%s, ", yytext); 
+									  char* aux1 = (char*)malloc(100 * sizeof(char)); sprintf(aux1, "(%s, ", yytext);
+									  copie_tranzitie2 = strcat(copie_tranzitie2, aux1);
 									  printf("%s)\n", stiva); 
+									  char* aux2 = (char*)malloc(100 * sizeof(char)); sprintf(aux2, "%s)\n", stiva);
+									  copie_tranzitie2 = strcat(copie_tranzitie2, aux2);
+									  int i;
+									  /*daca exista o variabila care are asociate mai multe valori*/
+									  printf("%s %s", copie_tranzitie1, copie_tranzitie2);
 									  BEGIN(DEFINIRE_TRANZITII); }
 	/*este identificat finalul definitiei unei tranzitii*/
 <DEFINIRE_TRANZITII>"\t) ;\n"		{ BEGIN(AUTOMAT); }
