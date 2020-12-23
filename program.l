@@ -3,6 +3,9 @@
 	#include<stdio.h>
 	#include<string.h>
 	#include<stdbool.h>
+	
+	#define MAX_VARIABLES 200 /*numarul maxim de variabile care pot aparea in fisierul de intrare*/
+	
 	int max_chars = 200;
 	char* grammar = " ::= Grammar";
 	char* automat = " ::= PushDownAutomata";
@@ -15,10 +18,40 @@
 	bool stari_finale = false; /*devine true daca exista stari finale in definitia unui AS*/
 	bool afisare_automat = false; /*devine true daca la momentul curent este afisata definitia unui automat*/
 	bool gramatica = false; /*devine true daca la momentul curent este afisata definit unei gramatici*/
+	
+	char* variabile[MAX_VARIABLES];
+	int nr_variabile; /*retine dimensiunea pentru vectorul de variabile*/
+	
+	char* valori_variabile[MAX_VARIABLES][2]; /*memoreaza asocierile variabila - valoare gasite in fisier*/
+	int nr_valori; /*retine numarul de asocieri valori-variabile identificate in cadrul analizei*/
+	char* variabila_curenta; /*retine variabila curenta pentru care se memoreaza valorile*/
+	
+	
+	/*aceleasi structuri pentru memorarea varibilelor sunt definite si pentru varibilele interne definitiei unui automat/gramatici*/
+	/*aceste structuri sunt dezalocate la finalul definirii automatului/gramaticii curente*/
+	char* variabile_interne[MAX_VARIABLES];
+	int nr_variabile_interne; /*retine dimensiunea pentru vectorul de variabile interne unei structuri*/
+	
+	char* valori_variabile_interne[MAX_VARIABLES][2]; /*memoreaza asocierile variabila - valoare gasite in defintia curenta*/
+	int nr_valori_interne; /*retine numarul de asocieri valori-variabile identificate in cadrul analizei*/
+	bool variabila_interna = false; /*devine true daca se face memorarea variabilei ca varibila interna*/
+
+
+	/*primeste un simbol si intoarce 1 daca simbolul respectiv este memorat ca variabila globala*/
+	int verifica_variabila_glolaba(char* simbol) { 
+		int i;
+		for (i = 0; i < nr_variabile; i++) { 
+			if (strcmp(simbol, variabile[i]) == 0) {
+				return 1;
+			}
+		}
+		return 0;
+	} 
+	
 %}
 
 %option stack
-%option 8bit full
+
 alfabet			[a-z0-9A-Z0-9]+
 stare_tranzitie "\t"{alfabet}" -> ("
 concatenare		&?
@@ -45,21 +78,64 @@ stiva 			{alfabet}{concatenare}{alfabet}
 %x STIVA
 %x DEFINIRE_TRANZITII
 
+%x MEMORARE_VARIABILE
+
 %%
-<INITIAL>\n\n		{ BEGIN(GASESTE_NUME); }	
+						  
+	/*s-a gasit o variabila in starea INITIAL, se va memora ca variabila gloabal impreuna cu valorile asociate acesteia*/									  	
+<INITIAL,GASESTE_NUME>"variable "			{ int before_variable_state = YYSTATE;
+							          		  yy_push_state(before_variable_state);
+							          		  BEGIN(MEMORARE_VARIABILE); }	
+	/*s-a gasit o variabila intr-una dintre starile AUTOMAT/GRAMATICA, se va memora ca variabila interna*/									  	
+<AUTOMAT,GRAMATICA>"variable "				{ int before_variable_state = YYSTATE;
+							          		  yy_push_state(before_variable_state);
+							          		  BEGIN(MEMORARE_VARIABILE);
+							          		  variabila_interna = true; }							          		  
+							          		  
+<MEMORARE_VARIABILE>{alfabet}" ::= {" 		{ yyless(yyleng - strlen(" ::= {")); 
+											  if (variabila_interna == true) {
+											  	variabile_interne[nr_variabile_interne++] = strdup(yytext);
+												variabila_curenta = strdup(yytext);
+										      }
+										      else { /*este memorata o valoare pentru o variabia globala*/
+										      	variabile[nr_variabile++] = strdup(yytext);
+												variabila_curenta = strdup(yytext);		
+										      }
+										    }		
+										    
+<MEMORARE_VARIABILE>{alfabet}				{ if (variabila_interna == false) {
+												  valori_variabile[nr_valori][0] = strdup(variabila_curenta);
+												  valori_variabile[nr_valori][1] = strdup(yytext);
+												  nr_valori++;
+											  }
+											  else {
+												  valori_variabile_interne[nr_valori_interne][0] = strdup(variabila_curenta);
+												  valori_variabile_interne[nr_valori_interne][1] = strdup(yytext);
+												  nr_valori_interne++;
+											  }
+											}
+	/*s-a identificat finalul definirii unei varibile*/									      	  
+<MEMORARE_VARIABILE>" } ;"					{ yy_pop_state(); variabila_interna = false; }					  
+<MEMORARE_VARIABILE>.|\n					{ }				
+
+
+
+
+
+<INITIAL>\n\n			{ BEGIN(GASESTE_NUME); }	
 	
-<INITIAL>% 			{ }	
-<INITIAL>.|%		{ }
+<INITIAL>% 				{ }	
+<INITIAL>.|\n			{ yymore(); }
 
 
-<GASESTE_NUME>" ::= Grammar (\n"  			{ yyless(yyleng - strlen(" ::= Grammar (\n"));
+<GASESTE_NUME,INITIAL>" ::= Grammar (\n"  	{ yyless(yyleng - strlen(" ::= Grammar (\n"));
 										  	  printf("Numele gramaticii: %s\n", yytext); 
 										  	  BEGIN(GRAMATICA); }
 										  
-<GASESTE_NUME>" ::= PushDownAutomata (\n"	{ yyless(yyleng - strlen(" ::= PushDownAutomata (\n"));
-										  	  printf("Numele automatului: %s\n", yytext); 
-										  	  afisare_automat = true;
-										  	  BEGIN(AUTOMAT); }
+<GASESTE_NUME,INITIAL>" ::= PushDownAutomata (\n"	{ yyless(yyleng - strlen(" ::= PushDownAutomata (\n"));
+										  	  		printf("Numele automatului: %s\n", yytext); 
+										  	  		afisare_automat = true;
+										  	  		BEGIN(AUTOMAT); }
 <GASESTE_NUME>"% "			{ }
 <GASESTE_NUME>\n			{ }
 	/*oricare alte caractere analizata in aceasta stare alcatuiesc numele cautat si sunt memorate*/
@@ -140,9 +216,9 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <*>"/*"								{ int before_comment_state = YYSTATE;
 							          yy_push_state(before_comment_state);
 									  BEGIN(COMENTARIU); }
-	/*igonora orice caracter de input pana la **/
+	/*igonora orice caracter de input pana la caracterul * */
 <COMENTARIU>[^*]				    {  }
-	/*s-a identificat finalul comentariul si se revine la starea de dinainte de gasirea comentariului*/
+	/*s-a identificat finalul comentariului si se revine la starea de dinainte de gasirea comentariului*/
 <COMENTARIU>"*/\n"					{ yy_pop_state(); }
 	/*s-a identificat finalul definitiei unui automat sau a unei gramatici*/
 	/*se verifica daca au fost definite starile finale*/
@@ -156,7 +232,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  stari_finale = false;
 									  afisare_automat = false;
 									  printf("\n"); }
-
+									  
 <AUTOMAT>.|\n   { }
 
 
@@ -172,6 +248,44 @@ int main(int argc, char** argv){
 	yylex();
 	
 	
-	printf("%d\n", counter);
+	printf("variabile globale: \n");
+	int i;
+	for (i = 0; i < nr_variabile; i++) {
+		printf("%s ", variabile[i]);
+	}
+	printf("\nvalorile pentru variabilele gloabale: \n");
+	
+	for (i = 0; i < nr_valori; i++) {
+		printf("%s %s\n", valori_variabile[i][0], valori_variabile[i][1]);
+	}
+	
+	printf("variabile locale: \n");
+	for (i = 0; i < nr_variabile_interne; i++) { 
+		printf("%s ", variabile_interne[i]);
+	}
+	
+	printf("\nvalorile pentru variabilele interne: \n");
+	
+	for (i = 0; i < nr_valori_interne; i++) {
+		printf("%s %s\n", valori_variabile_interne[i][0], valori_variabile_interne[i][1]);
+	}
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
