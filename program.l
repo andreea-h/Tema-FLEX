@@ -2,6 +2,7 @@
 %{ 
 	#include<stdio.h>
 	#include<string.h>
+	#include<stdbool.h>
 	int max_chars = 200;
 	char* grammar = " ::= Grammar";
 	char* automat = " ::= PushDownAutomata";
@@ -11,6 +12,9 @@
 	int afisare_tranzitii; /*are valoarea 1 daca s-a afisat deja mesajul "Functia de tranzitie: ", altfel este 0*/
 	int counter = 0;
 	int numarare_stari_as = 0;
+	bool stari_finale = false; /*devine true daca exista stari finale in definitia unui AS*/
+	bool afisare_automat = false; /*devine true daca la momentul curent este afisata definitia unui automat*/
+	bool gramatica = false; /*devine true daca la momentul curent este afisata definit unei gramatici*/
 %}
 
 %option stack
@@ -54,6 +58,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 										  
 <GASESTE_NUME>" ::= PushDownAutomata (\n"	{ yyless(yyleng - strlen(" ::= PushDownAutomata (\n"));
 										  	  printf("Numele automatului: %s\n", yytext); 
+										  	  afisare_automat = true;
 										  	  BEGIN(AUTOMAT); }
 <GASESTE_NUME>"% "			{ }
 <GASESTE_NUME>\n			{ }
@@ -88,7 +93,8 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <STARE_INITIALA_AS>\n				{ BEGIN(AUTOMAT); }
 <STARE_INITIALA_AS>. 				{ }
 
-<AUTOMAT>"final_states ::"			{ BEGIN(STARI_FINALE_AS); printf("Starile finale: {"); }
+	/*s-a identificat definitia starilor finale la AS*/
+<AUTOMAT>"final_states ::"			{ BEGIN(STARI_FINALE_AS); printf("Starile finale: {"); stari_finale = true; }
 <STARI_FINALE_AS>{alfabet}			{ printf("%s, ", yytext); }
 <STARI_FINALE_AS>{alfabet}" "		{ yyless(yyleng - 1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 <STARI_FINALE_AS>\n					{ BEGIN(AUTOMAT); }
@@ -136,10 +142,20 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  BEGIN(COMENTARIU); }
 	/*igonora orice caracter de input pana la **/
 <COMENTARIU>[^*]				    {  }
-	/*s-a identificat finalul comenatiului si se revine la starea de dinainte de gasirea comentariului*/
+	/*s-a identificat finalul comentariul si se revine la starea de dinainte de gasirea comentariului*/
 <COMENTARIU>"*/\n"					{ yy_pop_state(); }
-
-<*>") ;;"							{ BEGIN(INITIAL); numarare_stari_as = 0; afisare_tranzitii = 0; printf("\n"); }
+	/*s-a identificat finalul definitiei unui automat sau a unei gramatici*/
+	/*se verifica daca au fost definite starile finale*/
+	/*daca nu au fost define stari finale, se va afisa mesajul aferent cand multimea starilor finale este vida*/
+<*>") ;;"							{ if (afisare_automat == true && stari_finale == false) {
+									  	printf("Starile finale: {}\n");
+								      }
+									  BEGIN(INITIAL); 
+									  numarare_stari_as = 0; 
+									  afisare_tranzitii = 0; 
+									  stari_finale = false;
+									  afisare_automat = false;
+									  printf("\n"); }
 
 <AUTOMAT>.|\n   { }
 
