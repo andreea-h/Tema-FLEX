@@ -22,7 +22,7 @@
 	char* variabile[MAX_VARIABLES];
 	int nr_variabile; /*retine dimensiunea pentru vectorul de variabile*/
 	
-	char* valori_variabile[MAX_VARIABLES][2]; /*memoreaza asocierile  - valoare gasite in fisier*/
+	char* valori_variabile[MAX_VARIABLES][2]; /*memoreaza asocierile variabila-valoare gasite in fisier*/
 	int nr_valori; /*retine numarul de asocieri valori-variabile identificate in cadrul analizei*/
 	char* variabila_curenta; /*retine variabila curenta pentru care se memoreaza valorile*/
 	
@@ -30,7 +30,7 @@
 	/*aceleasi structuri pentru memorarea varibilelor sunt definite si pentru varibilele interne definitiei unui automat/gramatici*/
 	/*aceste structuri sunt dezalocate la finalul definirii automatului/gramaticii curente*/
 	char* variabile_interne[MAX_VARIABLES];
-	int nr_variabile_interne; /*retine dimensiunea pentru vectorul de variabile interne unei structuri*/
+	int nr_variabile_interne; /*retine dimensiunea pentru vectorul de variabile interne definite in interiorul unei structuri*/
 	
 	char* valori_variabile_interne[MAX_VARIABLES][2]; /*memoreaza asocierile variabila - valoare gasite in defintia curenta*/
 	int nr_valori_interne; /*retine numarul de asocieri valori-variabile identificate in cadrul analizei*/
@@ -49,7 +49,18 @@
 		return 0;
 	} 
 	
-	/*intoarce indicele primei aparitii a varibilei in vectorul de valori asociate varibilelor globale*/
+	/*primeste un simbol si intoarce 1 daca simbolul respectiv este memorat ca variabila locala*/
+	int verifica_variabila_interna(char* simbol) { 
+		int i;
+		for (i = 0; i < nr_variabile_interne; i++) { 
+			if (strcmp(simbol, variabile_interne[i]) == 0) {
+				return 1;
+			}
+		}
+		return 0;
+	} 
+	
+	/*intoarce indicele primei aparitii a variabilei in vectorul de valori asociate variabilelor globale*/
 	int prima_aparitie(char* simbol) {
 		int i;
 		for (i = 0; i < nr_valori; i++) {
@@ -60,8 +71,40 @@
 		return -1;
 	}
 	
+	/*intoarce indicele primei aparitii a variabilei in vectorul de valori asociate variabilelor locale definitiei curente*/
+	int prima_aparitie_interna(char* simbol) {
+		int i;
+		for (i = 0; i < nr_valori; i++) {
+			if (strcmp(valori_variabile_interne[i][0], simbol) == 0) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 	char* copie_tranzitie1; /*memoreaza o copie a tranzitiei pentru a face afisarea la explicitarea varibilelor*/
 	char* copie_tranzitie2;
+	
+	bool varibila_interna; /*devine true daca variabila identificata in tranzitia curenta este variabila interna*/
+	
+	void free_variabile_locale() {
+		int i;
+		for (i = 0; i < nr_variabile_interne; i++) {
+			free(variabile_interne[i]);
+		}
+		nr_variabile_interne = 0;
+	}
+	
+	void free_valori_var_locale() {
+		int i;
+		for (i = 0; i < nr_valori_interne; i++) {
+			free(valori_variabile_interne[i][0]);
+			free(valori_variabile_interne[i][1]);
+			valori_variabile_interne[i][0] = NULL;
+			valori_variabile_interne[i][1] = NULL;
+		}
+		nr_valori_interne = 0;
+	}
 %}
 
 %option stack
@@ -214,13 +257,21 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  BEGIN(TRANZITIE_AS); yyless(0); }
 <DEFINIRE_TRANZITII>.|\n			{ }
 <TRANZITIE_AS>{alfabet}", "			{ yyless(yyleng - 2);
-									  /*verifica daca simbolul analizat este variabila globala*/
-									  if (verifica_variabila_globala(yytext) == 0) {
-									  	printf("%s, ", yytext);
+									  /*verifica daca simbolul analizat este varibila interna definitiei curente*/
+									  if (verifica_variabila_interna(yytext) == 0) { /*simbolul nu este variabila interna*/
+										  /*verifica daca simbolul analizat este variabila globala*/
+										  if (verifica_variabila_globala(yytext) == 0) {
+										  	printf("%s, ", yytext);
+										  }
+										  else { /*este afisata prima valoare pe care o are asociata variabila globala*/
+										  	printf("%s, ", valori_variabile[prima_aparitie(yytext)][1]);
+										  	variabila_tranzitie = strdup(yytext);
+										  }
 									  }
-									  else { /*este afisata prima valoare pe care o are asociata variabila globala*/
-									  	printf("%s, ", valori_variabile[prima_aparitie(yytext)][1]);
-									  	variabila_tranzitie = strdup(yytext);
+									  else {
+									  	variabila_interna = true;
+									  	printf("%s, ", valori_variabile_interne[prima_aparitie_interna(yytext)][1]);
+										variabila_tranzitie = strdup(yytext);
 									  }
 									}
 <TRANZITIE_AS>{alfabet}" / " 		{ yyless(yyleng - 3); printf("%s) = ", yytext); 
@@ -246,17 +297,33 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  if (variabila_tranzitie != NULL) {
 									  	int i;
 									  	/*prima valoare asociata a fost deja afisata la identificarea variabilei*/
-									  	int first = -1;
-									  	for (i = 0; i < nr_valori; i++) {
-											if (strcmp(valori_variabile[i][0], variabila_tranzitie) == 0) {
-												if (first == -1) {
-													first = i;
-												}
-												if (i != first) {
-													printf("%s%s, %s", copie_tranzitie1, valori_variabile[i][1], copie_tranzitie2);
+									  	if (variabila_interna == false) {
+										  	int first = -1;
+										  	for (i = 0; i < nr_valori; i++) {
+												if (strcmp(valori_variabile[i][0], variabila_tranzitie) == 0) {
+													if (first == -1) {
+														first = i;
+													}
+													if (i != first) {
+														printf("%s%s, %s", copie_tranzitie1, valori_variabile[i][1], copie_tranzitie2);
+													}
 												}
 											}
 										}
+										else { /*sunt afisate valorile asociate variabilei locale*/
+											int first = -1;
+										  	for (i = 0; i < nr_valori_interne; i++) {
+												if (strcmp(valori_variabile_interne[i][0], variabila_tranzitie) == 0) {
+													if (first == -1) {
+														first = i;
+													}
+													if (i != first) {
+														printf("%s%s, %s", copie_tranzitie1, valori_variabile_interne[i][1], copie_tranzitie2);
+													}
+												}
+											}
+										}
+										variabila_interna = false;
 									  	free(variabila_tranzitie);
 									  	variabila_tranzitie = NULL;
 									  }
@@ -284,8 +351,13 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  afisare_tranzitii = 0; 
 									  stari_finale = false;
 									  afisare_automat = false;
-									  printf("\n"); }
-									  
+									  printf("\n"); 
+									  /*trebuie sterse variabilele locale memorate pentru definitia curenta de automat/gramatica*/ 
+									  if (valori_variabile_interne != NULL) {
+									  	free_variabile_locale();
+									  	free_valori_var_locale();
+									  }
+									 }
 <AUTOMAT>.|\n   { }
 
 

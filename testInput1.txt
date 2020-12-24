@@ -1,4 +1,5 @@
 variable y ::= { a, b } ;
+variable z ::= { x, o } ;
 
 automata5 ::= PushDownAutomata (
 % X&Y reprezinta o notatie pentru X concatenat cu Y
@@ -7,16 +8,16 @@ automata5 ::= PushDownAutomata (
 	states :: { q0 } ;
 	variable p ::= { a } ;
 	initial_state :: q0 ;
-	variable n ::= { a } ;
+	variable c ::= { a, ww, www } ;
 	
 	q0 -> (
-		y, Z0 / 0&Z0 -> q0 ;
-		y, Z0 / 1&Z0 -> q0 ;
+		a, Z0 / 0&Z0 -> q0 ;
+		c, Z0 / 1&Z0 -> q0 ;
 		a, 0 / 0&0 -> q0 ;
-		b, 0 / e -> q0 ;
+		a, 0 / e -> q0 ;
 		b, 1 / 1&1 -> q0 ;
 		a, 1 / e -> q0 ;
-		y, Z0 / e -> q0 ;
+		b, Z0 / e -> q0 ;
 	) ;
 	
 	/*
@@ -68,7 +69,7 @@ automata1 ::= PushDownAutomata (
 	initial_state :: q0 ;
 	
 	q0 -> (
-		y, z0 / X&Z0 -> q1 ;
+		c, z0 / X&Z0 -> q1 ;
 	) ;
 	
 	q1 -> (
@@ -87,8 +88,8 @@ automata1 ::= PushDownAutomata (
 	) ;
 	
 	q4 -> (
-		d, X / e -> q4 ;
-		e, Z0 / Z0 -> q4 ;
+		t, X / e -> q4 ;
+		z, Z0 / Z0 -> q4 ;
 	) ;
 	variable r ::= { a, b, d } ;
 	variable v ::= { a, b, d } ;
