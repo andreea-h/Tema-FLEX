@@ -24,7 +24,7 @@ grammar2 ::= Grammar (
 	nonterminals :: { S, S1 } ;
 	start_symbol :: S ;
 	
-	S -> a&S&a | b&S&b | S1 ;
+	S -> a&a | b&b | S1 ;
 	S1 -> a&S1 | b&S1 | e ;
 ) ;;
 

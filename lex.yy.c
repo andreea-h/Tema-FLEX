@@ -909,7 +909,7 @@ char *yytext;
 	/*intorce 1 daca simbol este neterminal, altfel intoarce -1*/
 	int check_neterminal(char* simbol) {
 		int i;
-		for (i = 0; i < nr_neterminale; i++) {
+		for (i = 0; i <= nr_neterminale; i++) {
 			if (strcmp(simbol, neterminale[i]) == 0) {
 				return 1;
 			}	
@@ -920,7 +920,7 @@ char *yytext;
 	/*intoarce 1 daca simbol este terminal, alfel intoarce -1*/
 	int check_terminal(char* simbol) {
 		int i;
-		for (i = 0; i < nr_simb_alfabet; i++) {
+		for (i = 0; i <= nr_simb_alfabet; i++) {
 			if (strcmp(simbol, alfabet[i]) == 0) {
 				return 1;
 			}
@@ -932,23 +932,40 @@ char *yytext;
 	void print_alfabet() {
 		printf("Alfabetul gramaticii: {");
 		int i;
-		for (i = 0; i < nr_simb_alfabet; i++) {
-			if (i != nr_simb_alfabet - 1) {
+		for (i = 0; i <= nr_simb_alfabet; i++) {
+			if (i != nr_simb_alfabet) {
 				printf("%s, ", alfabet[i]);
 			}
 			else {
-				printf("%s}", alfabet[i]);
+				printf("%s}\n", alfabet[i]);
 			}	
 		}
 		printf("\n");
 	}
-#line 946 "lex.yy.c"
+	
+	/*elibereaza memoria alocata pentru a retine el. din alfabet, neterminalii, simb, de start*/
+	void free_buffers() {
+		int i;
+		for (i = 0; i <= nr_neterminale; i++) {
+			free(neterminale[i]);
+			neterminale[i] = NULL;
+		}
+		nr_neterminale = 0;
+		
+		for (i = 0; i <= nr_simb_alfabet; i++) {
+			free(alfabet[i]);
+			alfabet[i] = NULL;
+		}
+		nr_simb_alfabet = 0;
+	
+	}
+#line 963 "lex.yy.c"
 
-#line 191 "program.l"
+#line 208 "program.l"
 	/*gramatica poate fi maxim de tipul 2*/
  
 
-#line 952 "lex.yy.c"
+#line 969 "lex.yy.c"
 
 #define INITIAL 0
 #define GRAMATICA 1
@@ -1198,11 +1215,11 @@ YY_DECL
 		}
 
 	{
-#line 195 "program.l"
+#line 212 "program.l"
 
 						  
 	/*s-a gasit o variabila in starea INITIAL, se va memora ca variabila gloabal impreuna cu valorile asociate acesteia*/									  	
-#line 1206 "lex.yy.c"
+#line 1223 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1267,7 +1284,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 198 "program.l"
+#line 215 "program.l"
 { int before_variable_state = YYSTATE;
 							          		  yy_push_state(before_variable_state);
 							          		  BEGIN(MEMORARE_VARIABILE); }	
@@ -1275,7 +1292,7 @@ YY_RULE_SETUP
 /*s-a gasit o variabila intr-una dintre starile AUTOMAT/GRAMATICA, se va memora ca variabila interna*/									  	
 case 2:
 YY_RULE_SETUP
-#line 202 "program.l"
+#line 219 "program.l"
 { int before_variable_state = YYSTATE;
 							          		  yy_push_state(before_variable_state);
 							          		  BEGIN(MEMORARE_VARIABILE);
@@ -1283,7 +1300,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 207 "program.l"
+#line 224 "program.l"
 { yyless(yyleng - strlen(" ::= {")); 
 											  if (variabila_interna == true) { /*variabila gasita trebuie memorata ca variabila interna*/
 											  	variabile_interne[nr_variabile_interne++] = strdup(yytext);
@@ -1297,7 +1314,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 218 "program.l"
+#line 235 "program.l"
 { if (variabila_interna == false) {
 												  valori_variabile[nr_valori][0] = strdup(variabila_curenta);
 												  valori_variabile[nr_valori][1] = strdup(yytext);
@@ -1313,36 +1330,36 @@ YY_RULE_SETUP
 /*s-a identificat finalul definirii unei varibile*/									      	  
 case 5:
 YY_RULE_SETUP
-#line 230 "program.l"
+#line 247 "program.l"
 { yy_pop_state(); variabila_interna = false; }					  
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 231 "program.l"
+#line 248 "program.l"
 { }				
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 237 "program.l"
+#line 254 "program.l"
 { BEGIN(GASESTE_NUME); }	
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 239 "program.l"
+#line 256 "program.l"
 { }	
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 240 "program.l"
+#line 257 "program.l"
 { yymore(); }
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 243 "program.l"
+#line 260 "program.l"
 { yyless(yyleng - strlen(" ::= Grammar (\n"));
 										  	  printf("Numele gramaticii: %s\n", yytext); 
 										  	  BEGIN(GRAMATICA); }
@@ -1350,7 +1367,7 @@ YY_RULE_SETUP
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 247 "program.l"
+#line 264 "program.l"
 { yyless(yyleng - strlen(" ::= PushDownAutomata (\n"));
 										  	  		  printf("Numele automatului: %s\n", yytext); 
 										  	  		  afisare_automat = true;
@@ -1358,82 +1375,82 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 251 "program.l"
+#line 268 "program.l"
 { }
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 252 "program.l"
+#line 269 "program.l"
 { }
 	YY_BREAK
 /*oricare alte caractere analizata in aceasta stare alcatuiesc numele cautat si sunt memorate*/
 case 14:
 YY_RULE_SETUP
-#line 254 "program.l"
+#line 271 "program.l"
 { yymore(); }
 	YY_BREAK
 /*incepe definitia alfabetului gramaticii*/
 case 15:
 YY_RULE_SETUP
-#line 258 "program.l"
+#line 275 "program.l"
 { BEGIN(MEMORARE_ALFABET_GRAMATICA); }
 	YY_BREAK
 /*este memorat simbolul din alfabet continut in yytext*/
 case 16:
 YY_RULE_SETUP
-#line 260 "program.l"
+#line 277 "program.l"
 { alfabet[nr_simb_alfabet++] = strdup(yytext);} 
 	YY_BREAK
 /*este identificat ultimul simbol din alfabet; s-a incheiat definitia alfebtului => se revine la starea GRAMATICA*/
 case 17:
 YY_RULE_SETUP
-#line 262 "program.l"
+#line 279 "program.l"
 { yyless(yyleng - 4); alfabet[nr_simb_alfabet] = strdup(yytext); BEGIN(GRAMATICA); } 
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 263 "program.l"
+#line 280 "program.l"
 { }
 	YY_BREAK
 /*incepe definitia multimii neterminalelor*/
 case 19:
 YY_RULE_SETUP
-#line 266 "program.l"
+#line 283 "program.l"
 { BEGIN(MEMORARE_NETERMINALI); }
 	YY_BREAK
 /*este memorat simbolul din alfabet continut in yytext*/
 case 20:
 YY_RULE_SETUP
-#line 268 "program.l"
+#line 285 "program.l"
 { neterminale[nr_neterminale++] = strdup(yytext); } 
 	YY_BREAK
 /*este identificat ultimul neterminal; s-a incheiat definitia multimii neterminalelor => se revine la starea GRAMATICA*/
 case 21:
 YY_RULE_SETUP
-#line 270 "program.l"
+#line 287 "program.l"
 { yyless(yyleng - 4); neterminale[nr_neterminale] = strdup(yytext); BEGIN(GRAMATICA); } 
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 271 "program.l"
+#line 288 "program.l"
 { }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 273 "program.l"
+#line 290 "program.l"
 { BEGIN(MEMORARE_SIMBOL_START); }
 	YY_BREAK
 /*este identificat simbolul de start*/
 case 24:
 YY_RULE_SETUP
-#line 275 "program.l"
+#line 292 "program.l"
 { yyless(yyleng - 2); simbol_start = strdup(yytext); BEGIN(GRAMATICA); }
 	YY_BREAK
 /*este identificata o productie pt care in partea dreapta gasim un singur neterminal*/	
 case 25:
 YY_RULE_SETUP
-#line 279 "program.l"
+#line 296 "program.l"
 { 
 	/*presupunem ca avem GR sau GIC*/
 	BEGIN(TIP_2_3_GRAMATICA);	
@@ -1441,7 +1458,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 284 "program.l"
+#line 301 "program.l"
 {
 	/*verifica daca ceea ce urmeaza dupa neterminal contine terminali*/
 	if (check_neterminal(yytext) == 1) {	
@@ -1452,171 +1469,171 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 293 "program.l"
+#line 310 "program.l"
 { } 
 	YY_BREAK
 /*s-a terminat analiza productiei de pe linia curenta; la acest match stim ca productia tocmai analizata indica GR*/
 case 28:
 /* rule 28 can match eol */
 YY_RULE_SETUP
-#line 295 "program.l"
+#line 312 "program.l"
 { BEGIN(GRAMATICA); }
 	YY_BREAK
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 296 "program.l"
-{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); }
+#line 313 "program.l"
+{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); }
 	YY_BREAK
 case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
-#line 297 "program.l"
+#line 314 "program.l"
 { }
 	YY_BREAK
 /*daca dupa un neterminal avem alti neterminali sau terminali, gramatica nu poate fi GR*/
 case 31:
 YY_RULE_SETUP
-#line 300 "program.l"
+#line 317 "program.l"
 { BEGIN(TIP_2_1_GRAMATICA); }	
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 301 "program.l"
+#line 318 "program.l"
 { yyless(0); yy_pop_state(); }
 	YY_BREAK
 case 33:
 /* rule 33 can match eol */
 YY_RULE_SETUP
-#line 304 "program.l"
+#line 321 "program.l"
 { }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 307 "program.l"
-{ BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {"); }
+#line 324 "program.l"
+{ BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {");  }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 308 "program.l"
+#line 325 "program.l"
 { printf("%s, ", yytext); } 
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 309 "program.l"
+#line 326 "program.l"
 { yyless(1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 310 "program.l"
+#line 327 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 311 "program.l"
+#line 328 "program.l"
 { }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 313 "program.l"
+#line 330 "program.l"
 { BEGIN(NUMARARE_STARI); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 314 "program.l"
+#line 331 "program.l"
 { numarare_stari_as++; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 315 "program.l"
+#line 332 "program.l"
 { printf("Numarul de stari: %d\n", numarare_stari_as); 			
 									  BEGIN(AUTOMAT); }
 	YY_BREAK
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 317 "program.l"
+#line 334 "program.l"
 { }									  
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 320 "program.l"
+#line 337 "program.l"
 { printf("Starea initiala: "); BEGIN(STARE_INITIALA_AS); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 321 "program.l"
+#line 338 "program.l"
 { printf("%s\n", yytext); }
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 322 "program.l"
+#line 339 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 323 "program.l"
+#line 340 "program.l"
 { }
 	YY_BREAK
 /*s-a identificat definitia starilor finale la AS*/
 case 47:
 YY_RULE_SETUP
-#line 326 "program.l"
+#line 343 "program.l"
 { BEGIN(STARI_FINALE_AS); printf("Starile finale: {"); stari_finale = true; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 327 "program.l"
+#line 344 "program.l"
 { printf("%s, ", yytext); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 328 "program.l"
+#line 345 "program.l"
 { yyless(yyleng - 1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 50:
 /* rule 50 can match eol */
 YY_RULE_SETUP
-#line 329 "program.l"
+#line 346 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 330 "program.l"
+#line 347 "program.l"
 { }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 332 "program.l"
+#line 349 "program.l"
 { BEGIN(ALFABET_STIVA); printf("Alfabetul stivei: {"); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 333 "program.l"
+#line 350 "program.l"
 { printf("%s, ", yytext); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 334 "program.l"
+#line 351 "program.l"
 { yyless(yyleng - 1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 335 "program.l"
+#line 352 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 336 "program.l"
+#line 353 "program.l"
 { }
 	YY_BREAK
 /*este identificat inceputul definirii functiilor de tranzitie, sirul pe care s-a facut match va fi reanalizat mai departe*/
 case 57:
 YY_RULE_SETUP
-#line 339 "program.l"
+#line 356 "program.l"
 { BEGIN(DEFINIRE_TRANZITII); 
 									  if (afisare_tranzitii == 0) {
 									  	printf("Functia de tranzitie:\n");
@@ -1627,7 +1644,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 347 "program.l"
+#line 364 "program.l"
 { yyless(yyleng - 5); printf("\tm(%s, ", yytext); stare = strdup(yytext); BEGIN(TRANZITIE_AS);
 									   copie_tranzitie1 = (char*)malloc(150 * sizeof(char)); 
 									   sprintf(copie_tranzitie1, "\tm(%s, ", yytext); /*este memorat string-ul aferent tranzitiei curente*/
@@ -1636,19 +1653,19 @@ YY_RULE_SETUP
 /*regula care se aplica cand sunt definite mai multe tranzitii pentru aceeasi stare*/
 case 59:
 YY_RULE_SETUP
-#line 352 "program.l"
+#line 369 "program.l"
 { printf("\tm(%s, ", stare); 
 									  BEGIN(TRANZITIE_AS); yyless(0); }
 	YY_BREAK
 case 60:
 /* rule 60 can match eol */
 YY_RULE_SETUP
-#line 354 "program.l"
+#line 371 "program.l"
 { }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 355 "program.l"
+#line 372 "program.l"
 { yyless(yyleng - 2);
 									  /*verifica daca simbolul analizat este varibila interna definitiei curente*/
 									  if (verifica_variabila_interna(yytext) == 0) { /*simbolul nu este variabila interna*/
@@ -1670,7 +1687,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 373 "program.l"
+#line 390 "program.l"
 { yyless(yyleng - 3); printf("%s) = ", yytext); 
 									  char* aux = (char*)malloc(100 * sizeof(char)); 
 									  sprintf(aux, "%s) = ", yytext);
@@ -1679,13 +1696,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 378 "program.l"
+#line 395 "program.l"
 { yyless(yyleng - 4);
 									  stiva = strdup(yytext); }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 380 "program.l"
+#line 397 "program.l"
 { yyless(yyleng - 4);
 									  stiva = strdup(yytext); }	
 	YY_BREAK
@@ -1694,7 +1711,7 @@ YY_RULE_SETUP
 case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
-#line 384 "program.l"
+#line 401 "program.l"
 { yyless(yyleng - 3); 
 									  printf("(%s, ", yytext); 
 									  char* aux1 = (char*)malloc(100 * sizeof(char)); sprintf(aux1, "(%s, ", yytext);
@@ -1743,19 +1760,19 @@ YY_RULE_SETUP
 case 66:
 /* rule 66 can match eol */
 YY_RULE_SETUP
-#line 428 "program.l"
+#line 445 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 67:
 /* rule 67 can match eol */
 YY_RULE_SETUP
-#line 429 "program.l"
+#line 446 "program.l"
 { }
 	YY_BREAK
 /*daca din oricare dintre stari se gaseste /*, trebuie sa ignoram tot continutul comentariului*/
 case 68:
 YY_RULE_SETUP
-#line 432 "program.l"
+#line 449 "program.l"
 { int before_comment_state = YYSTATE;
 							          yy_push_state(before_comment_state);
 									  BEGIN(COMENTARIU); }
@@ -1764,14 +1781,14 @@ YY_RULE_SETUP
 case 69:
 /* rule 69 can match eol */
 YY_RULE_SETUP
-#line 436 "program.l"
+#line 453 "program.l"
 {  }
 	YY_BREAK
 /*s-a identificat finalul comentariului si se revine la starea de dinainte de gasirea comentariului*/
 case 70:
 /* rule 70 can match eol */
 YY_RULE_SETUP
-#line 438 "program.l"
+#line 455 "program.l"
 { yy_pop_state(); }
 	YY_BREAK
 /*s-a identificat finalul definitiei unui automat sau a unei gramatici*/
@@ -1779,7 +1796,7 @@ YY_RULE_SETUP
 /*daca nu au fost define stari finale, se va afisa mesajul aferent cand multimea starilor finale este vida*/
 case 71:
 YY_RULE_SETUP
-#line 442 "program.l"
+#line 459 "program.l"
 { if (afisare_automat == true && stari_finale == false) {
 									  	printf("Starile finale: {}\n");
 								      }
@@ -1799,15 +1816,15 @@ YY_RULE_SETUP
 case 72:
 /* rule 72 can match eol */
 YY_RULE_SETUP
-#line 457 "program.l"
+#line 474 "program.l"
 { }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 460 "program.l"
+#line 477 "program.l"
 ECHO;
 	YY_BREAK
-#line 1811 "lex.yy.c"
+#line 1828 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(GRAMATICA):
 case YY_STATE_EOF(AUTOMAT):
@@ -2881,7 +2898,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 460 "program.l"
+#line 477 "program.l"
 
 
 	/*analiza se face dintr-un singur fisier*/

@@ -116,7 +116,7 @@
 	/*intorce 1 daca simbol este neterminal, altfel intoarce -1*/
 	int check_neterminal(char* simbol) {
 		int i;
-		for (i = 0; i < nr_neterminale; i++) {
+		for (i = 0; i <= nr_neterminale; i++) {
 			if (strcmp(simbol, neterminale[i]) == 0) {
 				return 1;
 			}	
@@ -127,7 +127,7 @@
 	/*intoarce 1 daca simbol este terminal, alfel intoarce -1*/
 	int check_terminal(char* simbol) {
 		int i;
-		for (i = 0; i < nr_simb_alfabet; i++) {
+		for (i = 0; i <= nr_simb_alfabet; i++) {
 			if (strcmp(simbol, alfabet[i]) == 0) {
 				return 1;
 			}
@@ -139,15 +139,32 @@
 	void print_alfabet() {
 		printf("Alfabetul gramaticii: {");
 		int i;
-		for (i = 0; i < nr_simb_alfabet; i++) {
-			if (i != nr_simb_alfabet - 1) {
+		for (i = 0; i <= nr_simb_alfabet; i++) {
+			if (i != nr_simb_alfabet) {
 				printf("%s, ", alfabet[i]);
 			}
 			else {
-				printf("%s}", alfabet[i]);
+				printf("%s}\n", alfabet[i]);
 			}	
 		}
 		printf("\n");
+	}
+	
+	/*elibereaza memoria alocata pentru a retine el. din alfabet, neterminalii, simb, de start*/
+	void free_buffers() {
+		int i;
+		for (i = 0; i <= nr_neterminale; i++) {
+			free(neterminale[i]);
+			neterminale[i] = NULL;
+		}
+		nr_neterminale = 0;
+		
+		for (i = 0; i <= nr_simb_alfabet; i++) {
+			free(alfabet[i]);
+			alfabet[i] = NULL;
+		}
+		nr_simb_alfabet = 0;
+	
 	}
 %}
 
@@ -292,7 +309,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <TIP_2_3_GRAMATICA>"&"				{ } 
 	/*s-a terminat analiza productiei de pe linia curenta; la acest match stim ca productia tocmai analizata indica GR*/
 <TIP_2_3_GRAMATICA>" ;\n"			{ BEGIN(GRAMATICA); }
-<TIP_2_3_GRAMATICA>" ;\n) ;;\n"		{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); }
+<TIP_2_3_GRAMATICA>" ;\n) ;;\n"		{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); }
 <TIP_2_3_GRAMATICA>.|\n				{ }
 
 	/*daca dupa un neterminal avem alti neterminali sau terminali, gramatica nu poate fi GR*/
@@ -303,7 +320,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <GRAMATICA>.|\n 					{ }
 
 
-<AUTOMAT>"alphabet :: "				{ BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {"); }
+<AUTOMAT>"alphabet :: "				{ BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {");  }
 <ALFABET_INTRARE_AS>{alfabet}		{ printf("%s, ", yytext); } 
 <ALFABET_INTRARE_AS>{alfabet}" }"	{ yyless(1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 <ALFABET_INTRARE_AS>\n				{ BEGIN(AUTOMAT); }
