@@ -170,6 +170,8 @@
 	/*retine numarul de simboluri din stanga si din dreapta productiei*/
 	int st = 0;
 	int dr = 0;
+	
+	bool tip_gasit_gfr = false; /*devine true daca a fost identificat si afisat tipul de gramatica (GFR)*/
 %}
 
 %option stack
@@ -260,7 +262,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <INITIAL>\n\n			{ BEGIN(GASESTE_NUME); }	
 	
 <INITIAL>% 				{ }	
-<INITIAL>.|\n			{ yymore(); }
+<INITIAL>.				{ yymore(); }
 
 
 <GASESTE_NUME,INITIAL>" ::= Grammar (\n"  	{ yyless(yyleng - strlen(" ::= Grammar (\n"));
@@ -302,8 +304,9 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <GRAMATICA>"\t"{alfabet}" -> "	{ 
 	/*presupunem ca avem GR sau GIC*/
 	BEGIN(TIP_2_3_GRAMATICA);	
-	printf("identificat: %s\n", yytext);
 }
+	/*daca in partea stanga a unei productii este gasit &, gramatica poate fi maxim GDC*/
+<GRAMATICA>"\t"{alfabet}"&"{alfabet}	{ st = 2; BEGIN(TIP_1_0_GRAMATICA_ST); }
 
 <TIP_2_3_GRAMATICA>{alfabet}	{
 	/*verifica daca ceea ce urmeaza dupa neterminal contine terminali*/
@@ -334,24 +337,47 @@ stiva 			{alfabet}{concatenare}{alfabet}
 
 	/*sunt numarate simbolurile din partea stanga a productiei curente*/
 <TIP_1_0_GRAMATICA_ST>{alfabet}			{ st++; }
-<TIP_1_0_GRAMATICA_ST>" -> " 			{ printf("%d", st); BEGIN(TIP_1_0_GRAMATICA_DR); }
+<TIP_1_0_GRAMATICA_ST>" -> " 			{ BEGIN(TIP_1_0_GRAMATICA_DR); }
 <TIP_1_0_GRAMATICA_ST>.					{ }
 
 <TIP_1_0_GRAMATICA_DR>{alfabet}			{ dr++; }
 	/*trebuie verificat st <= dr pt productia curenta*/
-<TIP_1_0_GRAMATICA_DR>" "				{ 
+<TIP_1_0_GRAMATICA_DR>"|"				{ 
 	if (st > dr) {
 		printf("Tipul gramaticii: GFR\n"); 
 		BEGIN(INITIAL); 
 		print_alfabet();
 		free_buffers();
+		tip_gasit_gfr = true;
 	}
-	else {
-		st = 0;
-	}
+	dr = 0;
 }	
-<TIP_1_0_GRAMATICA_DR>.|\n 			{ }
-	
+	/*la finalul liniei, este resetat st; la acest moment gramatica poate fi GDC sau GFR*/
+<TIP_1_0_GRAMATICA_DR>";\n"			{ 
+	if (st > dr) {
+		printf("Tipul gramaticii: GFR\n"); 
+		BEGIN(INITIAL); 
+		print_alfabet();
+		free_buffers();
+		tip_gasit_gfr = true;
+	}
+	st = 0; 
+	dr = 0; 
+	BEGIN(TIP_1_0_GRAMATICA_ST); 
+}
+	/*daca s-a ajuns la finalul definitiei gramaticii in acesta stare, gramatica este GDC*/
+<TIP_1_0_GRAMATICA_DR>" ;\n) ;;\n"	{ 
+	if (tip_gasit_gfr == false) {
+		printf("Tipul gramaticii: GDC\n");
+		print_alfabet(); 
+		free_buffers();
+	}
+	tip_gasit_gfr = false;
+	BEGIN(INITIAL); 
+
+}
+<TIP_1_0_GRAMATICA_DR>.				{ }
+
 <GRAMATICA>.|\n 					{ }
 
 
