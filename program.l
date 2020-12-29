@@ -310,9 +310,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 	BEGIN(TIP_2_3_GRAMATICA);	
 	/*este identificata prezenta simbolului de start in stanga unei productii*/
 	yyless(yyleng - 4);
-	printf("simbol identificat la stanga: %s\n", yytext + 1);
 	if (strcmp(simbol_start, yytext + 1) == 0) {
-		printf("aici\n");
 		exceptie_productie = true;
 	}
 }
@@ -329,13 +327,18 @@ stiva 			{alfabet}{concatenare}{alfabet}
 			check_start_symbol++;
 		}
 	}
+	if (strcmp(yytext, "e") == 0) {
+		if (exceptie_productie == true) {
+			caz_special = true;
+		}
+	}
 }
 
 
 <TIP_2_3_GRAMATICA>"&"				{ } 
 	/*s-a terminat analiza productiei de pe linia curenta; la acest match stim ca productia tocmai analizata indica GR*/
 <TIP_2_3_GRAMATICA>" ;\n"			{ BEGIN(GRAMATICA); }
-<TIP_2_3_GRAMATICA>" ;\n) ;;\n"		{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); }
+<TIP_2_3_GRAMATICA>" ;\n) ;;\n"		{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); exceptie_productie = false; caz_special = false; check_start_symbol = 0; }
 <TIP_2_3_GRAMATICA>.|\n				{ }
 
 	/*daca dupa un neterminal avem alti neterminali sau terminali, gramatica nu poate fi GR*/
@@ -349,11 +352,10 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <TIP_2_1_GRAMATICA>"\t"{alfabet}" -> "  	{ }
 	/*daca este identificat simbol de concatenare in partea stanga a productiei, gramatica nu poate fi GIC*/
 <TIP_2_1_GRAMATICA>"\t"{alfabet}"&"	 		{ st = 1; BEGIN(TIP_1_0_GRAMATICA_ST); }
-<TIP_2_1_GRAMATICA>" ;\n) ;;\n"				{ printf("Tipul gramaticii: GIC\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); check_start_symbol = 0; }
+<TIP_2_1_GRAMATICA>" ;\n) ;;\n"				{ printf("Tipul gramaticii: GIC\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); check_start_symbol = 0; exceptie_productie = false; caz_special = false; check_start_symbol = 0;}
 	/*la identificarea lui e, este verificat daca apare tranzitia simbol_start->e*/
 <TIP_2_1_GRAMATICA>"e"						{ 
 	if (exceptie_productie == true) {
-		printf("s-a gasit e\n");
 		/*a fost identificata tranzitia S->e*/
 		caz_special = true; 
 	}
@@ -363,7 +365,8 @@ stiva 			{alfabet}{concatenare}{alfabet}
 		check_start_symbol++;
 	}
 }
-<TIP_2_1_GRAMATICA>.|\n						{ }
+<TIP_2_1_GRAMATICA>\n						{ }
+<TIP_2_1_GRAMATICA>.						{ }
 
 
 
@@ -390,6 +393,9 @@ stiva 			{alfabet}{concatenare}{alfabet}
 		print_alfabet();
 		free_buffers();
 		tip_gasit_gfr = true;
+		exceptie_productie = false;
+		caz_special = false;
+		check_start_symbol = 0;
 	}
 	dr = 0;
 }	
@@ -401,6 +407,9 @@ stiva 			{alfabet}{concatenare}{alfabet}
 		print_alfabet();
 		free_buffers();
 		tip_gasit_gfr = true;
+		exceptie_productie = false;
+		caz_special = false;
+	check_start_symbol = 0;
 	}
 	st = 0; 
 	dr = 0; 
@@ -411,7 +420,6 @@ stiva 			{alfabet}{concatenare}{alfabet}
 	/*daca a fost gasita productia S->e, se verifica numarul de aparitii al simbolului de start in partea dreapta a aproductiilor*/
 
 	if (tip_gasit_gfr == false) {
-		printf("nr_aparitii: %d\n", check_start_symbol);
 		if (caz_special == false || ((caz_special == true) && (check_start_symbol == 0))) {
 			printf("Tipul gramaticii: GDC\n");
 			print_alfabet(); 
@@ -425,6 +433,9 @@ stiva 			{alfabet}{concatenare}{alfabet}
 		}
 	}
 	tip_gasit_gfr = false;
+	exceptie_productie = false;
+	caz_special = false;
+	check_start_symbol = 0;
 	BEGIN(INITIAL); 
 }
 <TIP_1_0_GRAMATICA_DR>.				{ }

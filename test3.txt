@@ -35,7 +35,7 @@ grammar4 ::= Grammar (
 	start_symbol :: S ;
 	
 	S -> e | T ;
-	T -> a&T&B&C | a&B&C ;
+	T -> a&T&B&C | S&a&B&C ;
 	C&B -> B&C ;
 	a&B -> a&b ;
 	b&B -> b&b ;
