@@ -6,7 +6,7 @@ grammar1 ::= Grammar (
 	alphabet :: { a, b, c } ;
 	start_symbol :: S ;
 	
-	S -> a&S&B&C | a&b&C ;
+	S -> a&a&B&C | a&b&C | e ;
 	C&B -> B&C ;
 	b&B -> b&b ;
 	b&C -> b&c ;

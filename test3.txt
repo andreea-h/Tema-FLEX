@@ -7,7 +7,7 @@ grammar1 ::= Grammar (
 	S -> a&S&b | a&b ;
 ) ;;
 
-/*gramatica pentru a^nb^m -> GR
+/*gramatica pentru a^nb^m -> GR*/
 grammar2 ::= Grammar (
 	nonterminals :: { S, B } ;
 	alphabet :: { a, b } ;
@@ -15,7 +15,8 @@ grammar2 ::= Grammar (
 	
 	S -> a&S | b&B ;
 	B -> bB | e ;
-) ;;*/
+) ;;
+
 
 % gramatica pentru w din {a, b}* cu |w|=2k -> gramatica regulata
 grammar3 ::= Grammar (
@@ -39,7 +40,7 @@ grammar4 ::= Grammar (
 	a&B -> a&b ;
 	b&B -> b&b ;
 	c&C -> c&C ;
-	b&C -> bc ;
+	b&C -> b&c ;
 ) ;;
 
 /* gramatica regulata pentru (0+1)*011 */
