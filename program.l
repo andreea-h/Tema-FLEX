@@ -105,6 +105,50 @@
 		}
 		nr_valori_interne = 0;
 	}
+	
+	/*variabile si functii pentru prelucrarea gramaticii si determinarea tipul acesteia*/
+	char* neterminale[MAX_VARIABLES];
+	int nr_neterminale;
+	char* alfabet[MAX_VARIABLES];
+	int nr_simb_alfabet; /*numarul de simboluri ale alfabetului*/
+	char* simbol_start;
+	
+	/*intorce 1 daca simbol este neterminal, altfel intoarce -1*/
+	int check_neterminal(char* simbol) {
+		int i;
+		for (i = 0; i < nr_neterminale; i++) {
+			if (strcmp(simbol, neterminale[i]) == 0) {
+				return 1;
+			}	
+		}
+		return -1;
+	}
+	
+	/*intoarce 1 daca simbol este terminal, alfel intoarce -1*/
+	int check_terminal(char* simbol) {
+		int i;
+		for (i = 0; i < nr_simb_alfabet; i++) {
+			if (strcmp(simbol, alfabet[i]) == 0) {
+				return 1;
+			}
+		}
+		return -1;
+	}
+	
+	/*afisare alfabet gramatica*/
+	void print_alfabet() {
+		printf("Alfabetul gramaticii: {");
+		int i;
+		for (i = 0; i < nr_simb_alfabet; i++) {
+			if (i != nr_simb_alfabet - 1) {
+				printf("%s, ", alfabet[i]);
+			}
+			else {
+				printf("%s}", alfabet[i]);
+			}	
+		}
+		printf("\n");
+	}
 %}
 
 %option stack
@@ -136,6 +180,16 @@ stiva 			{alfabet}{concatenare}{alfabet}
 %x DEFINIRE_TRANZITII
 
 %x MEMORARE_VARIABILE
+
+%x MEMORARE_ALFABET_GRAMATICA
+%x MEMORARE_NETERMINALI
+%x MEMORARE_SIMBOL_START
+
+
+%x TIP_2_3_GRAMATICA
+	/*gramatica poate fi maxim de tipul 2*/
+%x TIP_2_1_GRAMATICA 
+%x VERIFICA_TIP_3
 
 %%
 						  
@@ -199,13 +253,54 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <GASESTE_NUME>.						{ yymore(); }
 
 
-<GRAMATICA>"alphabet :: "			{ BEGIN(ALFABET_GRAMATICA); printf("Alfabetul gramaticii: {"); }
-<ALFABET_GRAMATICA>{alfabet}		{ printf("%s, ", yytext); } 
-<ALFABET_GRAMATICA>{alfabet}" }"	{ yyless(1); printf("%s}\n", yytext); BEGIN(GRAMATICA); } 
-<ALFABET_GRAMATICA>\n				{ BEGIN(GRAMATICA); }
-<ALFABET_GRAMATICA>.				{ }
+	/*incepe definitia alfabetului gramaticii*/
+<GRAMATICA>"alphabet :: "					{ BEGIN(MEMORARE_ALFABET_GRAMATICA); }
+	/*este memorat simbolul din alfabet continut in yytext*/
+<MEMORARE_ALFABET_GRAMATICA>{alfabet}		{ alfabet[nr_simb_alfabet++] = strdup(yytext);} 
+	/*este identificat ultimul simbol din alfabet; s-a incheiat definitia alfebtului => se revine la starea GRAMATICA*/
+<MEMORARE_ALFABET_GRAMATICA>{alfabet}" } ;"	{ yyless(yyleng - 4); alfabet[nr_simb_alfabet] = strdup(yytext); BEGIN(GRAMATICA); } 
+<MEMORARE_ALFABET_GRAMATICA>.				{ }
 
-<GRAMATICA>.|\n { }
+	/*incepe definitia multimii neterminalelor*/
+<GRAMATICA>"nonterminals :: "				{ BEGIN(MEMORARE_NETERMINALI); }
+	/*este memorat simbolul din alfabet continut in yytext*/
+<MEMORARE_NETERMINALI>{alfabet}				{ neterminale[nr_neterminale++] = strdup(yytext); } 
+	/*este identificat ultimul neterminal; s-a incheiat definitia multimii neterminalelor => se revine la starea GRAMATICA*/
+<MEMORARE_NETERMINALI>{alfabet}" } ;"		{ yyless(yyleng - 4); neterminale[nr_neterminale] = strdup(yytext); BEGIN(GRAMATICA); } 
+<MEMORARE_NETERMINALI>.						{ }
+
+<GRAMATICA>"start_symbol :: "				{ BEGIN(MEMORARE_SIMBOL_START); }
+	/*este identificat simbolul de start*/
+<MEMORARE_SIMBOL_START>{alfabet}" ;"		{ yyless(yyleng - 2); simbol_start = strdup(yytext); BEGIN(GRAMATICA); }
+
+
+	/*este identificata o productie pt care in partea dreapta gasim un singur neterminal*/	
+<GRAMATICA>"\t"{alfabet}" -> "	{ 
+	/*presupunem ca avem GR sau GIC*/
+	BEGIN(TIP_2_3_GRAMATICA);	
+}
+
+<TIP_2_3_GRAMATICA>{alfabet}	{
+	/*verifica daca ceea ce urmeaza dupa neterminal contine terminali*/
+	if (check_neterminal(yytext) == 1) {	
+		yy_push_state(YYSTATE); /*salveaza starea curenta*/
+		BEGIN(VERIFICA_TIP_3); /*verifica ce urmeaza dupa neterminalul curent*/
+	}
+}
+
+
+<TIP_2_3_GRAMATICA>"&"				{ } 
+	/*s-a terminat analiza productiei de pe linia curenta; la acest match stim ca productia tocmai analizata indica GR*/
+<TIP_2_3_GRAMATICA>" ;\n"			{ BEGIN(GRAMATICA); }
+<TIP_2_3_GRAMATICA>" ;\n) ;;\n"		{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); }
+<TIP_2_3_GRAMATICA>.|\n				{ }
+
+	/*daca dupa un neterminal avem alti neterminali sau terminali, gramatica nu poate fi GR*/
+<VERIFICA_TIP_3>"&"{alfabet}		{ BEGIN(TIP_2_1_GRAMATICA); }	
+<VERIFICA_TIP_3>" "					{ yyless(0); yy_pop_state(); }
+
+	
+<GRAMATICA>.|\n 					{ }
 
 
 <AUTOMAT>"alphabet :: "				{ BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {"); }
@@ -358,7 +453,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  	free_valori_var_locale();
 									  }
 									 }
-<AUTOMAT>.|\n   { }
+<AUTOMAT>.|\n   					 { }
 
 
 %%
@@ -372,7 +467,7 @@ int main(int argc, char** argv){
 	yyin = fopen(argv[1], "r");
 	yylex();
 	
-	
+	/*
 	printf("variabile globale: \n");
 	int i;
 	for (i = 0; i < nr_variabile; i++) {
@@ -393,7 +488,7 @@ int main(int argc, char** argv){
 	
 	for (i = 0; i < nr_valori_interne; i++) {
 		printf("%s %s\n", valori_variabile_interne[i][0], valori_variabile_interne[i][1]);
-	}
+	}*/
 	return 0;
 }
 

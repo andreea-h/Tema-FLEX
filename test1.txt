@@ -1,0 +1,57 @@
+variable y ::= { a, b, c } ;
+
+grammar1 ::= Grammar (
+	nonterminals :: { S, S1, S2, S3, S4 } ;
+	alphabet :: { a, b, c, d } ;
+	start_symbol :: S ;
+	
+	S -> a&S | b&S | a&S1 ;
+	S1 -> b&c&d&a&S2 | S4 ;
+	S2 -> a&c&S3 | e ;
+) ;;
+
+
+/*
+Acesta este un comentariu
+scris pe mai multe randuri
+
+
+si va trebui sa fie ignorat!
+Atentie: Daca vom avea definitii comentate atunci ele vor fi ignorate!
+*/
+grammar2 ::= Grammar (
+	alphabet :: { a, b } ;
+	nonterminals :: { S, S1 } ;
+	start_symbol :: S ;
+	
+	S -> a&S&a | b&S&b | S1 ;
+	S1 -> a&S1 | b&S1 | e ;
+) ;;
+
+
+% X&Y reprezinta o notatie pentru X concatenat cu Y
+automata5 ::= PushDownAutomata (
+	alphabet :: { a, b } ;
+	states :: { q0 } ;
+	initial_state :: q0 ;
+	stack_alphabet :: { Z0, 0, 1 } ;
+	
+	q0 -> (
+		a, Z0 / 0&Z0 -> q0 ;
+		b, Z0 / 1&Z0 -> q0 ;
+		a, 0 / 0&0 -> q0 ;
+		b, 0 / e -> q0 ;
+		b, 1 / 1&1 -> q0 ;
+		a, 1 / e -> q0 ;
+		e, Z0 / e -> q0 ;
+	) ;
+) ;;
+
+/*
+Acesta este un comentariu
+scris pe mai multe randuri
+
+
+si va trebui sa fie ignorat!
+Atentie: Daca vom avea definitii comentate atunci ele vor fi ignorate!
+*/
