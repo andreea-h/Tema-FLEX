@@ -261,7 +261,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 
 <INITIAL>\n\n			{ BEGIN(GASESTE_NUME); }	
 	
-<INITIAL>% 				{ }	
+<INITIAL>"% "			{ }	
 <INITIAL>.				{ yymore(); }
 
 
@@ -309,8 +309,8 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <GRAMATICA>"\t"{alfabet}"&"{alfabet}	{ st = 2; BEGIN(TIP_1_0_GRAMATICA_ST); }
 
 <TIP_2_3_GRAMATICA>{alfabet}	{
-	/*verifica daca ceea ce urmeaza dupa neterminal contine terminali*/
-	if (check_neterminal(yytext) == 1) {	
+	/*daca simbolul curent este neterminal*/
+	if (check_neterminal(yytext) == 1) {
 		yy_push_state(YYSTATE); /*salveaza starea curenta*/
 		BEGIN(VERIFICA_TIP_3); /*verifica ce urmeaza dupa neterminalul curent*/
 	}
@@ -510,7 +510,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 							          yy_push_state(before_comment_state);
 									  BEGIN(COMENTARIU); }
 	/*igonora orice caracter de input pana la caracterul * */
-<COMENTARIU>[^*]				    {  }
+<COMENTARIU>.|\n					{  }
 	/*s-a identificat finalul comentariului si se revine la starea de dinainte de gasirea comentariului*/
 <COMENTARIU>"*/\n"					{ yy_pop_state(); }
 	/*s-a identificat finalul definitiei unui automat sau a unei gramatici*/

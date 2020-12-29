@@ -1,0 +1,27 @@
+
+
+% GDC
+grammar1 ::= Grammar (
+	nonterminals :: { S, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	S -> a&S&B&C | a&b&C ;
+	C&B -> B&C ;
+	b&B -> b&b ;
+	b&C -> b&c ;
+	c&B -> B&c ;
+	c&C -> c&c ;
+) ;;
+
+
+% GIC
+/*w din {a, b}* | |w| = 2k*/
+grammar2 ::= Grammar (
+	nonterminals :: { S } ;
+	alphabet :: { a, b } ;
+	start_symbol :: S ;
+	
+	S -> a&S&b | a&S&a | b&S&a | b&S&b | e ;
+) ;;
+

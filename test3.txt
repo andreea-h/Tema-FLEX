@@ -1,0 +1,105 @@
+/*gramatica independenta de context*/
+grammar1 ::= Grammar (
+	nonterminals :: { S } ;
+	alphabet :: { a, b } ;
+	start_symbol :: S ;
+	
+	S -> a&S&b | a&b ;
+) ;;
+
+/*gramatica pentru a^nb^m -> GR
+grammar2 ::= Grammar (
+	nonterminals :: { S, B } ;
+	alphabet :: { a, b } ;
+	start_symbol :: S ;
+	
+	S -> a&S | b&B ;
+	B -> bB | e ;
+) ;;*/
+
+% gramatica pentru w din {a, b}* cu |w|=2k -> gramatica regulata
+grammar3 ::= Grammar (
+	nonterminals :: { S } ;
+	alphabet :: { a, b } ;
+	start_symbol :: S ;
+	
+	S -> a&a&S | a&b&S | b&a&S | b&b&S | e ;
+) ;;
+
+
+% gdc pentru a^ib^ic^i
+grammar4 ::= Grammar (
+	nonterminals :: { S, T, A, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	S -> e | T ;
+	T -> a&T&B&C | a&B&C ;
+	C&B -> B&C ;
+	a&B -> a&b ;
+	b&B -> b&b ;
+	c&C -> c&C ;
+	b&C -> bc ;
+) ;;
+
+/* gramatica regulata pentru (0+1)*011 */
+grammar5 ::= Grammar (
+	nonterminals :: { S, A, B } ;
+	alphabet :: { 0, 1 } ;
+	start_symbol :: S ;
+	
+	S -> 0&S | 0&A | 1&S ;
+	A -> 1&B ;
+	B -> 1 ;
+) ;;
+
+
+% GR
+/*gramatica regulata pentru w din {a, b}*| w contine 3 b-uri*/
+grammar6 ::= Grammar (
+	nonterminals :: { S, S1, S2, S3 } ;
+	alphabet :: { a, b } ;
+	start_symbol :: S ;
+	
+	S -> a&S | b&S1 ;
+	S1 -> a&S1 | b&S2 ;
+	S2 -> a&S2 | b&S3 ;
+	S3 -> a&S3 | e ;
+) ;;
+
+
+% GIC
+/*{ w din {a,b}* | w0 = w(n-1) }*/
+grammar7 ::= Grammar (
+	nonterminals :: { S, S1 } ;
+	alphabet :: { a, b } ;
+	start_symbol :: S ;
+	
+	S -> a&S1&a | b&S1&b ;
+	S1 -> a&S1 | b&S1 | e ;
+) ;;
+
+
+% GIC
+/*{ a^m b^n c^p d^q | m + n = p + q, m, n, p, q > 0 }*/
+grammar8 ::= Grammar (
+	nonterminals :: { S, A, B, C } ;
+	alphabet :: { a, b, c, d } ;
+	start_symbol :: S ;
+	
+	S -> a&S&d | A | b&C&d ;
+	A -> a&A&c | B ;
+	B -> b&B&c | e ;
+	C -> b&C&d | B ;
+) ;;
+
+
+
+
+
+
+
+
+
+
+
