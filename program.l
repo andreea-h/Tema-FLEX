@@ -166,6 +166,10 @@
 		nr_simb_alfabet = 0;
 	
 	}
+	
+	/*retine numarul de simboluri din stanga si din dreapta productiei*/
+	int st = 0;
+	int dr = 0;
 %}
 
 %option stack
@@ -207,6 +211,9 @@ stiva 			{alfabet}{concatenare}{alfabet}
 	/*gramatica poate fi maxim de tipul 2*/
 %x TIP_2_1_GRAMATICA 
 %x VERIFICA_TIP_3
+	/*gramatica poate fi maxim de tipul 1*/
+%x TIP_1_0_GRAMATICA_ST
+%x TIP_1_0_GRAMATICA_DR
 
 %%
 						  
@@ -264,10 +271,10 @@ stiva 			{alfabet}{concatenare}{alfabet}
 										  	  		  printf("Numele automatului: %s\n", yytext); 
 										  	  		  afisare_automat = true;
 										  	  		  BEGIN(AUTOMAT); }
-<GASESTE_NUME>"% "			{ }
-<GASESTE_NUME>\n			{ }
+<GASESTE_NUME>"% "									{ }
+<GASESTE_NUME>\n									{ }
 	/*oricare alte caractere analizata in aceasta stare alcatuiesc numele cautat si sunt memorate*/
-<GASESTE_NUME>.						{ yymore(); }
+<GASESTE_NUME>.										{ yymore(); }
 
 
 	/*incepe definitia alfabetului gramaticii*/
@@ -295,6 +302,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <GRAMATICA>"\t"{alfabet}" -> "	{ 
 	/*presupunem ca avem GR sau GIC*/
 	BEGIN(TIP_2_3_GRAMATICA);	
+	printf("identificat: %s\n", yytext);
 }
 
 <TIP_2_3_GRAMATICA>{alfabet}	{
@@ -316,6 +324,33 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <VERIFICA_TIP_3>"&"{alfabet}		{ BEGIN(TIP_2_1_GRAMATICA); }	
 <VERIFICA_TIP_3>" "					{ yyless(0); yy_pop_state(); }
 
+	/*stare in care se ajunge dupa ce am identificat ca gramatica poate fi maxim de tip 2*/
+	/*verificam daca productiile pastreaza in partea stanga un singur neterminal*/
+<TIP_2_1_GRAMATICA>"\t"{alfabet}" -> "  	{ }
+	/*daca este identificat simbol de concatenare in partea stanga a productiei, gramatica nu poate fi GIC*/
+<TIP_2_1_GRAMATICA>"\t"{alfabet}"&"	 		{ st = 1; BEGIN(TIP_1_0_GRAMATICA_ST); }
+<TIP_2_1_GRAMATICA>" ;\n) ;;\n"				{ printf("Tipul gramaticii: GIC\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); }
+<TIP_2_1_GRAMATICA>.|\n						{ }
+
+	/*sunt numarate simbolurile din partea stanga a productiei curente*/
+<TIP_1_0_GRAMATICA_ST>{alfabet}			{ st++; }
+<TIP_1_0_GRAMATICA_ST>" -> " 			{ printf("%d", st); BEGIN(TIP_1_0_GRAMATICA_DR); }
+<TIP_1_0_GRAMATICA_ST>.					{ }
+
+<TIP_1_0_GRAMATICA_DR>{alfabet}			{ dr++; }
+	/*trebuie verificat st <= dr pt productia curenta*/
+<TIP_1_0_GRAMATICA_DR>" "				{ 
+	if (st > dr) {
+		printf("Tipul gramaticii: GFR\n"); 
+		BEGIN(INITIAL); 
+		print_alfabet();
+		free_buffers();
+	}
+	else {
+		st = 0;
+	}
+}	
+<TIP_1_0_GRAMATICA_DR>.|\n 			{ }
 	
 <GRAMATICA>.|\n 					{ }
 
