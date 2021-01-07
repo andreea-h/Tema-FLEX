@@ -1,3 +1,43 @@
+/*automat cu stiva pentru 0^n 1^n U 0^n 1^(2n), n >= 1*/
+automata0 ::= PushDownAutomata (
+	alphabet :: { 1, 0 } ;
+	states :: { q0, q1, q2, q3, q4, q5, q6 } ;
+	stack_alphabet :: { Z0, 0, 1 } ; 
+	initial_state :: q0 ;
+
+	%Aceasta linie reprezinta un comentariu
+	q0 -> (
+		e, Z0 / Z0 -> q1 ;
+		e, Z0 / Z0 -> q2 ;
+	) ;
+	
+	q1 -> (
+		0, Z0 / 0&Z0 -> q1 ; 
+		0, Z0 / 0&0 -> q1 ; 
+		1, 0 / e -> q3 ;
+	) ;
+	
+	q2 -> (
+		0, Z0 / 0&0&Z0 -> q2 ; 
+		0, 0 / 0&0&0 -> q4 ;  
+	) ;
+	
+	%comment3
+	
+	q3 -> (
+		1, 0 / e -> q3 ;
+		e, Z0 / Z0 -> q5 ;
+	) ;
+	
+	q4 -> (
+		1, 0 / e -> q4 ;
+		e, Z0 / Z0 -> q6 ;
+	) ;
+	
+	final_states :: { q5, q6 } ;
+) ;;
+
+
 /*gramatica independenta de context*/
 grammar1 ::= Grammar (
 	nonterminals :: { S } ;
@@ -7,8 +47,9 @@ grammar1 ::= Grammar (
 	S -> a&S&b | a&b ;
 ) ;;
 
-
 /*gramatica pentru a^nb^m -> GR*/
+/*
+definitia comentata va fi ignorata
 grammar2 ::= Grammar (
 	nonterminals :: { S, B } ;
 	alphabet :: { a, b } ;
@@ -17,7 +58,7 @@ grammar2 ::= Grammar (
 	S -> a&S | b&B ;
 	B -> bB | e ;
 ) ;;
-
+*/
 % gramatica pentru w din {a, b}* cu |w|=2k -> gramatica regulata
 grammar3 ::= Grammar (
 	nonterminals :: { S } ;
@@ -35,7 +76,7 @@ grammar4 ::= Grammar (
 	start_symbol :: S ;
 	
 	S -> e | T ;
-	T -> a&T&B&C | a&B&C ;
+	T -> a&T&B&C | S&a&B&C ;
 	C&B -> B&C ;
 	a&B -> a&b ;
 	b&B -> b&b ;
@@ -86,16 +127,61 @@ grammar8 ::= Grammar (
 	start_symbol :: S ;
 	
 	S -> a&S&d | A | b&C&d ;
-	A -> a&A&c | B ;
+	%A -> a&A&c | B ;
 	B -> b&B&c | e ;
 	C -> b&C&d | B ;
 ) ;;
 
+variable y ::= { c, a } ;
 
+automata0 ::= PushDownAutomata (
+	alphabet :: { a, b, c } ; %automatul pentru w din {a, b, c}* unde #a(w)+#b(w)=#c(w)
+	states :: { q0 } ;
+	initial_state :: q0 ; 
+	stack_alphabet :: { Z0, X, Y } ;
+	q0 -> ( 
+		a, Z0 / X&Z0 -> q0 ;
+		b, Z0 / X&Z0 -> q0 ;
+		c, Z0 / Y&Z0 -> q0 ;
+		a, Y / e -> q0 ;
+		b, Y / e -> q0 ;
+		c, X / e -> q0 ;
+		e, Z0 / e -> q0 ;
+		a, X / X&X -> q0 ;
+		b, X / X&X -> q0 ;
+		y, Y / Y&Y -> q0 ; 
+	) ;
+) ;;
 
-
-
-
+% Automat pentru a^n c b^n cu n >= 1 si acceptare prin stari finale
+automata1 ::= PushDownAutomata (
+	alphabet :: { a, b, c } ;
+	states :: { q0, q1, q2, q3 } ;
+	initial_state :: q0 ;
+	final_states :: { q1, q3 } ;
+	stack_alphabet :: { Z0, a, b, c } ; /*alfabetul stivei*/
+	variable y ::= { a, b } ; /*variabila locala este cea explicitata la tranzitie de mai jos*/
+	
+	%Aceasta linie reprezinta un comentariu
+	q0 -> (
+		a, Z0 / a&Z0 -> q1 ;
+	) ;
+	
+	q1 -> (
+		c, a / a -> q2 ; 
+		y, a / a&a -> q1 ; %comment1
+	) ;
+	
+	q2 -> (
+		b, a / e -> q3 ;       
+	) ;
+	
+	%comment3
+	
+	q3 -> (
+		b, a / e -> q3 ;%comment2
+	) ;
+) ;;
 
 
 

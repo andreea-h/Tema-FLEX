@@ -74,7 +74,7 @@
 	/*intoarce indicele primei aparitii a variabilei in vectorul de valori asociate variabilelor locale definitiei curente*/
 	int prima_aparitie_interna(char* simbol) {
 		int i;
-		for (i = 0; i < nr_valori; i++) {
+		for (i = 0; i < nr_valori_interne; i++) {
 			if (strcmp(valori_variabile_interne[i][0], simbol) == 0) {
 				return i;
 			}
@@ -183,7 +183,7 @@
 alfabet			[a-z0-9A-Z0-9]+
 stare_tranzitie "\t"{alfabet}" -> ("
 concatenare		&?
-stiva 			{alfabet}{concatenare}{alfabet}
+stiva 			{alfabet}{concatenare}
 
 %x GRAMATICA
 %x AUTOMAT
@@ -234,7 +234,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 							          		  yy_push_state(before_variable_state);
 							          		  BEGIN(MEMORARE_VARIABILE);
 							          		  variabila_interna = true; }							          		  
-							          		  
+	/*este identificat numele variabilei care se va memora*/							          		  
 <MEMORARE_VARIABILE>{alfabet}" ::= {" 		{ yyless(yyleng - strlen(" ::= {")); 
 											  if (variabila_interna == true) { /*variabila gasita trebuie memorata ca variabila interna*/
 											  	variabile_interne[nr_variabile_interne++] = strdup(yytext);
@@ -252,13 +252,14 @@ stiva 			{alfabet}{concatenare}{alfabet}
 												  nr_valori++;
 											  }
 											  else {
+											  	
 												  valori_variabile_interne[nr_valori_interne][0] = strdup(variabila_curenta);
 												  valori_variabile_interne[nr_valori_interne][1] = strdup(yytext);
 												  nr_valori_interne++;
 											  }
 											}
 	/*s-a identificat finalul definirii unei varibile*/									      	  
-<MEMORARE_VARIABILE>" } ;"					{ yy_pop_state(); variabila_interna = false; }					  
+<MEMORARE_VARIABILE>" } ;"					{ yy_pop_state(); variabila_interna = false;  }					  
 <MEMORARE_VARIABILE>.|\n					{ }				
 
 
@@ -419,7 +420,7 @@ stiva 			{alfabet}{concatenare}{alfabet}
 }
 	/*daca s-a ajuns la finalul definitiei gramaticii in acesta stare, gramatica este GDC*/
 <TIP_1_0_GRAMATICA_DR>" ;\n) ;;\n"	{ 
-	/*daca a fost gasita productia S->e, se verifica numarul de aparitii al simbolului de start in partea dreapta a aproductiilor*/
+	/*daca a fost gasita productia S->e, se verifica numarul de aparitii al simbolului de start in partea dreapta a productiilor*/
 
 	if (tip_gasit_gfr == false) {
 		if (caz_special == false || ((caz_special == true) && (check_start_symbol == 0))) {
@@ -446,9 +447,10 @@ stiva 			{alfabet}{concatenare}{alfabet}
 
 <AUTOMAT>"%"					    { int before_comment_state = YYSTATE;
 									   yy_push_state(before_comment_state);
-									   BEGIN(COMENTARIU_LINIE); }
-<COMENTARIU_LINIE>\n							{ yy_pop_state(); }
-<COMENTARIU_LINIE>.							{ }	
+									   BEGIN(COMENTARIU_LINIE); 
+									}
+<COMENTARIU_LINIE>\n				{ yy_pop_state(); }
+<COMENTARIU_LINIE>.					{ }	
 
 
 <AUTOMAT>"alphabet :: "				{ BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {");  }
@@ -460,7 +462,8 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <AUTOMAT>"states ::"				{ BEGIN(NUMARARE_STARI); }
 <NUMARARE_STARI>{alfabet}			{ numarare_stari_as++; }
 <NUMARARE_STARI>;					{ printf("Numarul de stari: %d\n", numarare_stari_as); 			
-									  BEGIN(AUTOMAT); }
+									  BEGIN(AUTOMAT); 
+									  numarare_stari_as = 0; }
 <NUMARARE_STARI>.|\n				{ }									  
 
 
@@ -483,24 +486,32 @@ stiva 			{alfabet}{concatenare}{alfabet}
 <ALFABET_STIVA>.					{ }
 
 	/*este identificat inceputul definirii functiilor de tranzitie, sirul pe care s-a facut match va fi reanalizat mai departe*/
-<AUTOMAT>{stare_tranzitie}			{ BEGIN(DEFINIRE_TRANZITII); 
+<AUTOMAT>{stare_tranzitie}			 { BEGIN(DEFINIRE_TRANZITII); 
 									  if (afisare_tranzitii == 0) {
 									  	printf("Functia de tranzitie:\n");
 									  	afisare_tranzitii = 1;
 									  }  
-									  yyless(0);
-									}
-	
-<DEFINIRE_TRANZITII>{alfabet}" -> (" { yyless(yyleng - 5); printf("\tm(%s, ", yytext); stare = strdup(yytext); BEGIN(TRANZITIE_AS);
-									   copie_tranzitie1 = (char*)malloc(150 * sizeof(char)); 
-									   sprintf(copie_tranzitie1, "\tm(%s, ", yytext); /*este memorat string-ul aferent tranzitiei curente*/
+									  yyless(0); /*sirul pe care s-a facut match va fi reanalizat*/
+									 }
+									
+	/*este identificata starea 'de start' a unei tranzitii*/
+<DEFINIRE_TRANZITII>{alfabet}" -> (" {  yyless(yyleng - 5); 
+										/*printf("\tm(%s, ", yytext);*/ 
+										stare = strdup(yytext); /*este memorata starea initiala pentru a fi afisata ulterior*/
+										BEGIN(TRANZITIE_AS);
+										/*copie_tranzitie1 este folosit ulterior la afisare daca exista variabile in tranzitie*/
+									    copie_tranzitie1 = (char*)malloc(150 * sizeof(char)); 
+									    sprintf(copie_tranzitie1, "\tm(%s, ", yytext); 
+									    /*este memorat string-ul aferent incepututlui tranzitiei curente*/
 									 }
 	/*regula care se aplica cand sunt definite mai multe tranzitii pentru aceeasi stare*/
 <DEFINIRE_TRANZITII>{alfabet}		{ printf("\tm(%s, ", stare); 
-									  BEGIN(TRANZITIE_AS); yyless(0); }
-<DEFINIRE_TRANZITII>.|\n			{ }
+									  BEGIN(TRANZITIE_AS); yyless(0); 
+									}
+									
+	/*este identificat elementul din alfabet prezent in tranzitia curenta analizata*/
 <TRANZITIE_AS>{alfabet}", "			{ yyless(yyleng - 2);
-									  /*verifica daca simbolul analizat este varibila interna definitiei curente*/
+									  /*verifica daca simbolul analizat este variabila interna definitiei curente*/
 									  if (verifica_variabila_interna(yytext) == 0) { /*simbolul nu este variabila interna*/
 										  /*verifica daca simbolul analizat este variabila globala*/
 										  if (verifica_variabila_globala(yytext) == 0) {
@@ -512,28 +523,35 @@ stiva 			{alfabet}{concatenare}{alfabet}
 										  }
 									  }
 									  else {
+									  	/*printf("\tm(%s, ", stare); starea initiala memorata */
 									  	variabila_interna = true;
 									  	printf("%s, ", valori_variabile_interne[prima_aparitie_interna(yytext)][1]);
 										variabila_tranzitie = strdup(yytext);
 									  }
 									}
-<TRANZITIE_AS>{alfabet}" / " 		{ yyless(yyleng - 3); printf("%s) = ", yytext); 
+									
+<TRANZITIE_AS>{alfabet}" /" 		{ yyless(yyleng - 2); printf("%s) = ", yytext); 
 									  char* aux = (char*)malloc(100 * sizeof(char)); 
 									  sprintf(aux, "%s) = ", yytext);
 									  copie_tranzitie2 = strdup(aux);
 									}
-<TRANZITIE_AS>{stiva}" -> "			{ yyless(yyleng - 4);
-									  stiva = strdup(yytext); }
-<TRANZITIE_AS>"e -> "				{ yyless(yyleng - 4);
-									  stiva = strdup(yytext); }	
+	/*identifica noul varf al stivei*/										
+<TRANZITIE_AS>{stiva}{1,}" -> "|{alfabet}" -> "		{ yyless(yyleng - 4);
+									  			  stiva = strdup(yytext); 
+											    }
+
 	/*este identificata starea urmatoare dintr-o tranzitie*/	
-	/*s-a incheiat scrierea unei tranzitii*/								  								  	
-<TRANZITIE_AS>{alfabet}" ;\n"		{ yyless(yyleng - 3); 
+	/*deci s-a incheiat definirea unei tranzitii*/								  								  	
+<TRANZITIE_AS>{alfabet}" ;"		    { yyless(yyleng - 2); 
 									  printf("(%s, ", yytext); 
-									  char* aux1 = (char*)malloc(100 * sizeof(char)); sprintf(aux1, "(%s, ", yytext);
+									  char* aux1 = (char*)malloc(100 * sizeof(char)); 
+									  /*la acest moment yytext retine starea urmatoare din tranzitia curenta*/
+									  sprintf(aux1, "(%s, ", yytext);
 									  copie_tranzitie2 = strcat(copie_tranzitie2, aux1);
+									  /*stiva a fost identificat si memorat in cadrul unei reguli anterioare, reprezentand ce se va pune pe stiva in tranzitia curenta*/
 									  printf("%s)\n", stiva); 
-									  char* aux2 = (char*)malloc(100 * sizeof(char)); sprintf(aux2, "%s)\n", stiva);
+									  char* aux2 = (char*)malloc(100 * sizeof(char)); 
+									  sprintf(aux2, "%s)\n", stiva);
 									  copie_tranzitie2 = strcat(copie_tranzitie2, aux2);
 									  int i;
 	/*daca anterior s-a identificat o variabila care trebuie extinsa, vor fi afisate si tranzitiile coresp. celorlalte valori ale variabilei*/
@@ -561,7 +579,8 @@ stiva 			{alfabet}{concatenare}{alfabet}
 														first = i;
 													}
 													if (i != first) {
-														printf("%s%s, %s", copie_tranzitie1, valori_variabile_interne[i][1], copie_tranzitie2);
+														printf("%s%s, %s", copie_tranzitie1, 
+														valori_variabile_interne[i][1], copie_tranzitie2);
 													}
 												}
 											}
@@ -571,9 +590,25 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									  	variabila_tranzitie = NULL;
 									  }
 									  BEGIN(DEFINIRE_TRANZITII); }
+									  						  
+	/*daca este identificat un comentariu pe linia unde se defineste o tranzitie*/									  	
+<TRANZITIE_AS,DEFINIRE_TRANZITII>"%"	{ int before_comment_state = YYSTATE;
+							              yy_push_state(before_comment_state);
+									      BEGIN(COMENTARIU_LINIE);
+									    }								  
 	/*este identificat finalul definitiei unei tranzitii*/
-<DEFINIRE_TRANZITII>"\t) ;\n"		{ BEGIN(AUTOMAT); }
-<TRANZITIE_AS>.|\n					{ }
+<DEFINIRE_TRANZITII>"\t) ;\n"		   { BEGIN(AUTOMAT); }
+
+
+<TRANZITIE_AS,DEFINIRE_TRANZITII>"\t%" { int before_comment_state = YYSTATE;
+							             yy_push_state(before_comment_state);
+									     BEGIN(COMENTARIU_LINIE);
+									   }
+<TRANZITIE_AS>\n					   { BEGIN(DEFINIRE_TRANZITII); }			   
+<DEFINIRE_TRANZITII>.|\n			   { }					   
+<TRANZITIE_AS>. 					   { }
+
+
 
 	/*daca din oricare dintre stari se gaseste /*, trebuie sa ignoram tot continutul comentariului*/
 <*>"/*"								{ int before_comment_state = YYSTATE;
@@ -614,7 +649,7 @@ int main(int argc, char** argv){
 	yyin = fopen(argv[1], "r");
 	yylex();
 	
-	/*
+		/*
 	printf("variabile globale: \n");
 	int i;
 	for (i = 0; i < nr_variabile; i++) {
@@ -635,6 +670,6 @@ int main(int argc, char** argv){
 	
 	for (i = 0; i < nr_valori_interne; i++) {
 		printf("%s %s\n", valori_variabile_interne[i][0], valori_variabile_interne[i][1]);
-	}*/
+	} */
 	return 0;
 }

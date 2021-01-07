@@ -1,5 +1,3 @@
-variable y ::= { a, b, c } ;
-
 grammar1 ::= Grammar (
 	nonterminals :: { S, S1, S2 } ;
 	start_symbol :: S ; %comentariu 
@@ -21,7 +19,6 @@ grammar2 ::= Grammar (
 	S -> a&S&a | b&S&b | S1 ; %comentariu
 	S1 -> a&S1 | b&S1 | e ;
 ) ;;
-
 grammar3 ::= Grammar (
 	nonterminals :: { S, S1, S2 } ;
 	alphabet :: { a, b } ; % comentariu
@@ -34,23 +31,27 @@ grammar3 ::= Grammar (
 ) ;;
 %alt comentariu
 
+
 % X&Y reprezinta o notatie pentru X concatenat cu Y
 automata5 ::= PushDownAutomata (
-	alphabet :: { a, b } ;
+	alphabet :: { a, b } ; %comentariu
 	%states :: { q1 } ;
 	states :: { q0 } ;
 	initial_state :: q0 ; 
-	stack_alphabet :: { Z0, 0, 1 } ; %comentariu
+	stack_alphabet :: { Z0, 0, 1 } ;
+	variable y ::= { a, b } ;
+	variable u ::= { b, a } ;
 	
-	q0 -> (
-		y, Z0 / 0&Z0&Z1 -> q0 ;
-		b, Z0 / 1&Z0&Z1 -> q0 ;
-		a, 0 / 0&0 -> q0 ;
-		b, 0 / e -> q0 ;
-		b, 1 / 1&1 -> q0 ;
-		a, 1 / e -> q0 ;
-		e, Z0 / e -> q0 ;
+	q0 -> ( 
+		y, Z0 / Z0 -> q0 ;
+		a, Z0 / Z0&Z0 -> q0 ;
+		a, 0 / 0&0&1 -> q0 ;%comentariu ignorat
+		/*b, 0 / e -> q0 ;*/
+		b, 1 / 1&1&0 -> q0 ; %comentariu
+		%a, 1 / e -> q0 ; acesta linie este ignorata
+		u, Z0 / e -> q0 ;
 	) ;
+	/*acesta este un comentariu*/
 ) ;;
 
 /*

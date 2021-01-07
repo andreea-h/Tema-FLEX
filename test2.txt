@@ -10,6 +10,34 @@ grammar1 ::= Grammar (
 	S2 -> a&S2 | y ;
 ) ;;
 
+/*exemplu de automat cu acceptarea prin stiva goala*/
+automata1 ::= PushDownAutomata (
+	alphabet :: { a, b, c, d } ;
+	stack_alphabet :: { Z0, a, b, c } ;
+	states :: { q0, q1, q2, q3, q4 } ;
+	initial_state :: q0 ;
+	
+	q0 -> ( 
+		y, Z0 / a&Z0 -> q1 ; %extindere variabila globala
+	) ;
+	
+	q1 -> ( 
+		a, a / a&a -> q1 ;
+		c, a / a -> q2 ;
+	) ;
+	
+	% Aceasta linie reprezinta un comentariu
+	
+	q2 -> (
+		b, a / e -> q3 ; %acesta este un alt comentariu
+	) ;
+	
+	q3 -> (
+		b, a / e -> q3 ;/*comentariu */
+	    e, Z0 / e -> q4 ;
+	) ;
+) ;;
+
 % gramatica regulata
 grammar2 ::= Grammar (
 	nonterminals :: { S1, S2 } ;
@@ -21,35 +49,44 @@ grammar2 ::= Grammar (
 ) ;;
 
 %aceasta linie este un comentariu
-automata1 ::= PushDownAutomata (
+automata2 ::= PushDownAutomata (
 	alphabet :: { a, b, c, d } ;
 	stack_alphabet :: { Z0, X } ;
 	states :: { q0, q1, q2, q3, q4 } ;
 	final_states :: { q4 } ;
 	initial_state :: q0 ;
-	variable y ::= { a, b } ;
+	%variable y ::= { a, b } ; declaratie ignorata
 	
-	q0 -> (
-		y, z0 / X&Z0 -> q1 ;
-	) ;
-	
-	q1 -> (
-		a, X / X&X -> q1 ;
+	q0 -> ( 
+		a, Z0 / X&Z0 -> q1 ;
 		b, X / e -> q2 ;
 	) ;
 	
+	q1 -> ( 
+		%a, X / X&X&X -> q1 ;
+		y, X / X -> q2 ;%este extinsa variabila globala y avand valorile a, b, c
+	) ;
+	
+	% Aceasta linie reprezinta un comentariu
+	variable z ::= { a, b, c } ;
+	variable w ::= { b, c } ;
 	q2 -> (
-		b, X / e -> q2 ;
-		c, Z0 / X&Z0 -> q3 ;
+		z, X / e -> q2 ; %aici este extinsa variabila locala z
+		c, Z0 / X&Z0&X -> q3 ;
 	) ;
 	
 	q3 -> (
-		c, X / X&X -> q3 ;
-		d, X / e -> q4 ;
+		a, X / X&X -> q3 ;/*comentariu */
+	    w, X / e -> q4 ; /*este extinsa variabila interna w*/
 	) ;
 	
 	q4 -> (
 		d, X / e -> q4 ;
-		e, Z0 / Z0 -> q4 ;
+		a, Z0 / Z0 -> q4 ;%acesta este un comentariu si va fi ignorat
 	) ;
 ) ;;
+
+
+
+
+
