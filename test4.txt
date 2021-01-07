@@ -1,6 +1,4 @@
-
-
-% GDC
+% GFR
 /*apare S->e dar S nu mai exista in partea dreapta a nici unei alte productii*/
 grammar1 ::= Grammar (
 	nonterminals :: { S, B, C } ;
@@ -10,11 +8,10 @@ grammar1 ::= Grammar (
 	S -> a&a&B&C | a&b&C | e ;
 	C&B -> B&C ;
 	b&B -> b&b ;
-	b&C -> b&c ;
+	b&C -> S&b&c ;
 	c&B -> B&c ;
 	c&C -> c&c ;
 ) ;;
-
 
 % GIC
 /*w din {a, b}* | |w| = 2k*/
@@ -26,14 +23,13 @@ grammar2 ::= Grammar (
 	S -> a&S&b | a&S&a | b&S&a | b&S&b | e ;
 ) ;;
 
-
 /*GFR*/
 grammar3 ::= Grammar (
 	nonterminals :: { S, B, C } ;
 	alphabet :: { a, b, c } ;
 	start_symbol :: S ;
 	
-	S -> a&a&B&C | e | S&a&b&C ;
+	S -> a&a&B&C | e | a&b&C ;
 	C&B -> B&C ;
 	b&B -> b&b ;
 	b&C -> b&c ;

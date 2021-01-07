@@ -221,6 +221,8 @@ stiva 			{alfabet}{concatenare}{alfabet}
 %x TIP_1_0_GRAMATICA_ST
 %x TIP_1_0_GRAMATICA_DR
 
+%x COMENTARIU_LINIE
+
 %%
 						  
 	/*s-a gasit o variabila in starea INITIAL, se va memora ca variabila gloabal impreuna cu valorile asociate acesteia*/									  	
@@ -263,10 +265,10 @@ stiva 			{alfabet}{concatenare}{alfabet}
 
 
 
-<INITIAL>\n\n			{ BEGIN(GASESTE_NUME); }	
+<INITIAL>\n 					{ BEGIN(GASESTE_NUME); }	
 	
-<INITIAL>"% "			{ }	
-<INITIAL>.				{ yymore(); }
+<INITIAL>"%"					{ }	
+<INITIAL>.						{ yymore(); }
 
 
 <GASESTE_NUME,INITIAL>" ::= Grammar (\n"  	{ yyless(yyleng - strlen(" ::= Grammar (\n"));
@@ -442,6 +444,12 @@ stiva 			{alfabet}{concatenare}{alfabet}
 
 <GRAMATICA>.|\n 					{ }
 
+<AUTOMAT>"%"					    { int before_comment_state = YYSTATE;
+									   yy_push_state(before_comment_state);
+									   BEGIN(COMENTARIU_LINIE); }
+<COMENTARIU_LINIE>\n							{ yy_pop_state(); }
+<COMENTARIU_LINIE>.							{ }	
+
 
 <AUTOMAT>"alphabet :: "				{ BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {");  }
 <ALFABET_INTRARE_AS>{alfabet}		{ printf("%s, ", yytext); } 
@@ -595,7 +603,6 @@ stiva 			{alfabet}{concatenare}{alfabet}
 									 }
 <AUTOMAT>.|\n   					 { }
 
-
 %%
 
 	/*analiza se face dintr-un singur fisier*/
@@ -631,21 +638,3 @@ int main(int argc, char** argv){
 	}*/
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

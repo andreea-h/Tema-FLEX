@@ -10,6 +10,7 @@ grammar1 ::= Grammar (
 	S2 -> a&S2 | y ;
 ) ;;
 
+% gramatica regulata
 grammar2 ::= Grammar (
 	nonterminals :: { S1, S2 } ;
 	alphabet :: { a, b, c } ;
@@ -19,6 +20,7 @@ grammar2 ::= Grammar (
 	S2 -> y&S1 | e ;
 ) ;;
 
+%aceasta linie este un comentariu
 automata1 ::= PushDownAutomata (
 	alphabet :: { a, b, c, d } ;
 	stack_alphabet :: { Z0, X } ;

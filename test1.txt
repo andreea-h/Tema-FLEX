@@ -2,44 +2,49 @@ variable y ::= { a, b, c } ;
 
 grammar1 ::= Grammar (
 	nonterminals :: { S, S1, S2 } ;
-	alphabet :: { a, b } ;
+	start_symbol :: S ; %comentariu 
+	alphabet :: { a, b, c } ; %gramatica regulata
 	
-	start_symbol :: S ;
-	S -> a&S | b&S | a&S1 ;
+	%productii:
+	S -> y&S | a&S1 ;
 	S1 -> b&S2 | e ;
-	S2 -> a&S2 | aa ;
+	%S2 -> S1&a&S2 | y ;
+	S2 -> a&S2 | y ;
 ) ;;
 
 grammar2 ::= Grammar (
 	nonterminals :: { S, S1 } ;
 	alphabet :: { a, b } ;
-	start_symbol :: S ;
+	start_symbol :: S ; %GIC
 	
-	S -> a&S&a | b&S&b | S1 ;
+	%X&Y este o notatie pentru X concatenat cu Y
+	S -> a&S&a | b&S&b | S1 ; %comentariu
 	S1 -> a&S1 | b&S1 | e ;
 ) ;;
 
 grammar3 ::= Grammar (
 	nonterminals :: { S, S1, S2 } ;
-	alphabet :: { a, b } ;
+	alphabet :: { a, b } ; % comentariu
+	%start_symbol :: S1 ;
 	start_symbol :: S ;
 	
-	S -> S1&S2 ;
+	S -> S1&S2 ; %gramatica independenta de context
 	S1 -> a&S1&a | b&S1&b | e ;
 	S2 -> a&S2 | b&S2 | e ;
 ) ;;
-
+%alt comentariu
 
 % X&Y reprezinta o notatie pentru X concatenat cu Y
 automata5 ::= PushDownAutomata (
 	alphabet :: { a, b } ;
+	%states :: { q1 } ;
 	states :: { q0 } ;
-	initial_state :: q0 ;
-	stack_alphabet :: { Z0, 0, 1 } ;
+	initial_state :: q0 ; 
+	stack_alphabet :: { Z0, 0, 1 } ; %comentariu
 	
 	q0 -> (
-		a, Z0 / 0&Z0 -> q0 ;
-		b, Z0 / 1&Z0 -> q0 ;
+		y, Z0 / 0&Z0&Z1 -> q0 ;
+		b, Z0 / 1&Z0&Z1 -> q0 ;
 		a, 0 / 0&0 -> q0 ;
 		b, 0 / e -> q0 ;
 		b, 1 / 1&1 -> q0 ;
