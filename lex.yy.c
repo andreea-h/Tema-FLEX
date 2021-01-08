@@ -1583,49 +1583,65 @@ case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
 #line 345 "program.l"
-{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); exceptie_productie = false; caz_special = false; check_start_symbol = 0; }
+{ printf("Tipul gramaticii: GR\n");
+									  BEGIN(INITIAL); print_alfabet(); 
+									  free_buffers(); 
+									  exceptie_productie = false; 
+									  caz_special = false; 
+									  check_start_symbol = 0; 
+									}
 	YY_BREAK
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 346 "program.l"
+#line 352 "program.l"
 { }
 	YY_BREAK
 /*daca dupa un neterminal avem alti neterminali sau terminali, gramatica nu poate fi GR*/
 /*se trece in starea TIP_2_1_GRAMATICA unde se verifica partea stanga a productiilor pt a distinge intre GIC si GDC*/
 case 32:
 YY_RULE_SETUP
-#line 350 "program.l"
-{ if (strcmp(yytext, simbol_start) == 0) { check_start_symbol++; } BEGIN(TIP_2_1_GRAMATICA); }	
+#line 356 "program.l"
+{ if (strcmp(yytext, simbol_start) == 0) 
+										{ 
+											check_start_symbol++; 
+										} 
+										BEGIN(TIP_2_1_GRAMATICA); }	
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 351 "program.l"
+#line 361 "program.l"
 { yyless(0); yy_pop_state(); }
 	YY_BREAK
 /*stare in care se ajunge dupa ce am identificat ca gramatica poate fi maxim de tip 2*/
 /*verificam daca productiile pastreaza in partea stanga un singur neterminal*/
 case 34:
 YY_RULE_SETUP
-#line 356 "program.l"
+#line 366 "program.l"
 { }
 	YY_BREAK
 /*daca este identificat simbol de concatenare in partea stanga a productiei, gramatica nu poate fi GIC*/
 case 35:
 YY_RULE_SETUP
-#line 358 "program.l"
+#line 368 "program.l"
 { st = 1; BEGIN(TIP_1_0_GRAMATICA_ST); }
 	YY_BREAK
 case 36:
 /* rule 36 can match eol */
 YY_RULE_SETUP
-#line 359 "program.l"
-{ printf("Tipul gramaticii: GIC\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); check_start_symbol = 0; exceptie_productie = false; caz_special = false; check_start_symbol = 0;}
+#line 369 "program.l"
+{ printf("Tipul gramaticii: GIC\n"); 
+											  BEGIN(INITIAL); print_alfabet(); 
+											  free_buffers(); 
+											  check_start_symbol = 0; 
+											  exceptie_productie = false; 
+											  caz_special = false; 
+											  check_start_symbol = 0;}
 	YY_BREAK
 /*la identificarea lui e, este verificat daca apare tranzitia simbol_start->e*/
 case 37:
 YY_RULE_SETUP
-#line 361 "program.l"
+#line 377 "program.l"
 { 
 	if (exceptie_productie == true) {
 		/*a fost identificata tranzitia S->e*/
@@ -1635,7 +1651,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 367 "program.l"
+#line 383 "program.l"
 {
 	if (strcmp(yytext, simbol_start) == 0) {
 		check_start_symbol++;
@@ -1645,33 +1661,33 @@ YY_RULE_SETUP
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 372 "program.l"
+#line 388 "program.l"
 { }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 373 "program.l"
+#line 389 "program.l"
 { }
 	YY_BREAK
 /*sunt numarate simbolurile din partea stanga a productiei curente*/
 case 41:
 YY_RULE_SETUP
-#line 378 "program.l"
+#line 394 "program.l"
 { st++; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 379 "program.l"
+#line 395 "program.l"
 { BEGIN(TIP_1_0_GRAMATICA_DR); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 380 "program.l"
+#line 396 "program.l"
 { }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 382 "program.l"
+#line 398 "program.l"
 { 
 	if (strcmp(yytext, "e") != 0) {
 		dr++; 
@@ -1686,7 +1702,7 @@ YY_RULE_SETUP
 /*trebuie verificat st <= dr pt productia curenta*/
 case 45:
 YY_RULE_SETUP
-#line 393 "program.l"
+#line 409 "program.l"
 { 
 	if (st > dr) {
 		printf("Tipul gramaticii: GFR\n"); 
@@ -1705,7 +1721,7 @@ YY_RULE_SETUP
 case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
-#line 407 "program.l"
+#line 423 "program.l"
 { 
 	if (st > dr) {
 		printf("Tipul gramaticii: GFR\n"); 
@@ -1726,7 +1742,7 @@ YY_RULE_SETUP
 case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
-#line 423 "program.l"
+#line 439 "program.l"
 { 
 	/*daca a fost gasita productia S->e, se verifica numarul de aparitii al simbolului de start in partea dreapta a productiilor*/
 
@@ -1752,18 +1768,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 445 "program.l"
+#line 461 "program.l"
 { }
 	YY_BREAK
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 447 "program.l"
+#line 463 "program.l"
 { }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 449 "program.l"
+#line 465 "program.l"
 { int before_comment_state = YYSTATE;
 									   yy_push_state(before_comment_state);
 									   BEGIN(COMENTARIU_LINIE); 
@@ -1772,53 +1788,53 @@ YY_RULE_SETUP
 case 51:
 /* rule 51 can match eol */
 YY_RULE_SETUP
-#line 453 "program.l"
+#line 469 "program.l"
 { yy_pop_state(); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 454 "program.l"
+#line 470 "program.l"
 { }	
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 457 "program.l"
+#line 473 "program.l"
 { BEGIN(ALFABET_INTRARE_AS); printf("Alfabetul de intrare: {");  }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 458 "program.l"
+#line 474 "program.l"
 { printf("%s, ", yytext); } 
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 459 "program.l"
+#line 475 "program.l"
 { yyless(1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 56:
 /* rule 56 can match eol */
 YY_RULE_SETUP
-#line 460 "program.l"
+#line 476 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 461 "program.l"
+#line 477 "program.l"
 { }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 463 "program.l"
+#line 479 "program.l"
 { BEGIN(NUMARARE_STARI); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 464 "program.l"
+#line 480 "program.l"
 { numarare_stari_as++; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 465 "program.l"
+#line 481 "program.l"
 { printf("Numarul de stari: %d\n", numarare_stari_as); 			
 									  BEGIN(AUTOMAT); 
 									  numarare_stari_as = 0; }
@@ -1826,87 +1842,87 @@ YY_RULE_SETUP
 case 61:
 /* rule 61 can match eol */
 YY_RULE_SETUP
-#line 468 "program.l"
+#line 484 "program.l"
 { }									  
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 471 "program.l"
+#line 487 "program.l"
 { printf("Starea initiala: "); BEGIN(STARE_INITIALA_AS); }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 472 "program.l"
+#line 488 "program.l"
 { printf("%s\n", yytext); }
 	YY_BREAK
 case 64:
 /* rule 64 can match eol */
 YY_RULE_SETUP
-#line 473 "program.l"
+#line 489 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 474 "program.l"
+#line 490 "program.l"
 { }
 	YY_BREAK
 /*s-a identificat definitia starilor finale la AS*/
 case 66:
 YY_RULE_SETUP
-#line 477 "program.l"
+#line 493 "program.l"
 { BEGIN(STARI_FINALE_AS); printf("Starile finale: {"); stari_finale = true; }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 478 "program.l"
+#line 494 "program.l"
 { printf("%s, ", yytext); }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 479 "program.l"
+#line 495 "program.l"
 { yyless(yyleng - 1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 69:
 /* rule 69 can match eol */
 YY_RULE_SETUP
-#line 480 "program.l"
+#line 496 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 481 "program.l"
+#line 497 "program.l"
 { }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 483 "program.l"
+#line 499 "program.l"
 { BEGIN(ALFABET_STIVA); printf("Alfabetul stivei: {"); }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 484 "program.l"
+#line 500 "program.l"
 { printf("%s, ", yytext); }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 485 "program.l"
+#line 501 "program.l"
 { yyless(yyleng - 1); printf("%s}\n", yytext); BEGIN(AUTOMAT); } 
 	YY_BREAK
 case 74:
 /* rule 74 can match eol */
 YY_RULE_SETUP
-#line 486 "program.l"
+#line 502 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 487 "program.l"
+#line 503 "program.l"
 { }
 	YY_BREAK
 /*este identificat inceputul definirii functiilor de tranzitie, sirul pe care s-a facut match va fi reanalizat mai departe*/
 case 76:
 YY_RULE_SETUP
-#line 490 "program.l"
+#line 506 "program.l"
 { BEGIN(DEFINIRE_TRANZITII); 
 									  if (afisare_tranzitii == 0) {
 									  	printf("Functia de tranzitie:\n");
@@ -1918,9 +1934,8 @@ YY_RULE_SETUP
 /*este identificata starea 'de start' a unei tranzitii*/
 case 77:
 YY_RULE_SETUP
-#line 499 "program.l"
+#line 515 "program.l"
 {  yyless(yyleng - 5); 
-										/*printf("\tm(%s, ", yytext);*/ 
 										stare = strdup(yytext); /*este memorata starea initiala pentru a fi afisata ulterior*/
 										BEGIN(TRANZITIE_AS);
 										/*copie_tranzitie1 este folosit ulterior la afisare daca exista variabile in tranzitie*/
@@ -1929,18 +1944,21 @@ YY_RULE_SETUP
 									    /*este memorat string-ul aferent incepututlui tranzitiei curente*/
 									 }
 	YY_BREAK
-/*regula care se aplica cand sunt definite mai multe tranzitii pentru aceeasi stare*/
+/*regula care afiseaza starea initiala dintr-o tranzitie*/
+/*la acet moment analizorul a identificat si simbolul de pe banda*/
+/*sirul curent match-uit va fi reanalizat pt afisarea simbolului de pe banda*/
 case 78:
 YY_RULE_SETUP
-#line 509 "program.l"
+#line 526 "program.l"
 { printf("\tm(%s, ", stare); 
 									  BEGIN(TRANZITIE_AS); yyless(0); 
 									}
 	YY_BREAK
-/*este identificat elementul din alfabet prezent in tranzitia curenta analizata*/
+/*este identificat elementul din alfabet prezent in tranzitia curenta analizata (adica valoarea de pe banda)*/
+/*trebuie verificat daca simbolul asociat sirului curent de pe banda este variabila globala/interna*/
 case 79:
 YY_RULE_SETUP
-#line 514 "program.l"
+#line 532 "program.l"
 { yyless(yyleng - 2);
 									  /*verifica daca simbolul analizat este variabila interna definitiei curente*/
 									  if (verifica_variabila_interna(yytext) == 0) { /*simbolul nu este variabila interna*/
@@ -1954,35 +1972,35 @@ YY_RULE_SETUP
 										  }
 									  }
 									  else {
-									  	/*printf("\tm(%s, ", stare); starea initiala memorata */
 									  	variabila_interna = true;
 									  	printf("%s, ", valori_variabile_interne[prima_aparitie_interna(yytext)][1]);
 										variabila_tranzitie = strdup(yytext);
 									  }
 									}
 	YY_BREAK
+/*este identificat simbolul asociat cu varful stivei*/								
 case 80:
 YY_RULE_SETUP
-#line 534 "program.l"
+#line 551 "program.l"
 { yyless(yyleng - 2); printf("%s) = ", yytext); 
 									  char* aux = (char*)malloc(100 * sizeof(char)); 
 									  sprintf(aux, "%s) = ", yytext);
 									  copie_tranzitie2 = strdup(aux);
 									}
 	YY_BREAK
-/*identifica noul varf al stivei*/										
+/*este identificat si memorat noul sir care se pune in varful stivei*/										
 case 81:
 YY_RULE_SETUP
-#line 540 "program.l"
+#line 557 "program.l"
 { yyless(yyleng - 4);
-									  			  stiva = strdup(yytext); 
-											    }
+									  			  	  stiva = strdup(yytext); 
+											   		 }
 	YY_BREAK
 /*este identificata starea urmatoare dintr-o tranzitie*/	
 /*deci s-a incheiat definirea unei tranzitii*/								  								  	
 case 82:
 YY_RULE_SETUP
-#line 546 "program.l"
+#line 562 "program.l"
 { yyless(yyleng - 2); 
 									  printf("(%s, ", yytext); 
 									  char* aux1 = (char*)malloc(100 * sizeof(char)); 
@@ -2035,7 +2053,7 @@ YY_RULE_SETUP
 /*daca este identificat un comentariu pe linia unde se defineste o tranzitie*/									  	
 case 83:
 YY_RULE_SETUP
-#line 596 "program.l"
+#line 612 "program.l"
 { int before_comment_state = YYSTATE;
 							              yy_push_state(before_comment_state);
 									      BEGIN(COMENTARIU_LINIE);
@@ -2045,38 +2063,39 @@ YY_RULE_SETUP
 case 84:
 /* rule 84 can match eol */
 YY_RULE_SETUP
-#line 601 "program.l"
+#line 617 "program.l"
 { BEGIN(AUTOMAT); }
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 604 "program.l"
+#line 620 "program.l"
 { int before_comment_state = YYSTATE;
 							             yy_push_state(before_comment_state);
 									     BEGIN(COMENTARIU_LINIE);
 									   }
 	YY_BREAK
+/*este regula pe care se face match dupa identificarea starii de start din definirea unei tranzitii*/									   	
 case 86:
 /* rule 86 can match eol */
 YY_RULE_SETUP
-#line 608 "program.l"
+#line 625 "program.l"
 { BEGIN(DEFINIRE_TRANZITII); }			   
 	YY_BREAK
 case 87:
 /* rule 87 can match eol */
 YY_RULE_SETUP
-#line 609 "program.l"
+#line 626 "program.l"
 { }					   
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 610 "program.l"
+#line 627 "program.l"
 { }
 	YY_BREAK
 /*daca din oricare dintre stari se gaseste /*, trebuie sa ignoram tot continutul comentariului*/
 case 89:
 YY_RULE_SETUP
-#line 615 "program.l"
+#line 632 "program.l"
 { int before_comment_state = YYSTATE;
 							          yy_push_state(before_comment_state);
 									  BEGIN(COMENTARIU); }
@@ -2085,14 +2104,14 @@ YY_RULE_SETUP
 case 90:
 /* rule 90 can match eol */
 YY_RULE_SETUP
-#line 619 "program.l"
+#line 636 "program.l"
 {  }
 	YY_BREAK
 /*s-a identificat finalul comentariului si se revine la starea de dinainte de gasirea comentariului*/
 case 91:
 /* rule 91 can match eol */
 YY_RULE_SETUP
-#line 621 "program.l"
+#line 638 "program.l"
 { yy_pop_state(); }
 	YY_BREAK
 /*s-a identificat finalul definitiei unui automat sau a unei gramatici*/
@@ -2100,7 +2119,7 @@ YY_RULE_SETUP
 /*daca nu au fost define stari finale, se va afisa mesajul aferent cand multimea starilor finale este vida*/
 case 92:
 YY_RULE_SETUP
-#line 625 "program.l"
+#line 642 "program.l"
 { if (afisare_automat == true && stari_finale == false) {
 									  	printf("Starile finale: {}\n");
 								      }
@@ -2120,15 +2139,15 @@ YY_RULE_SETUP
 case 93:
 /* rule 93 can match eol */
 YY_RULE_SETUP
-#line 640 "program.l"
+#line 657 "program.l"
 { }
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 642 "program.l"
+#line 659 "program.l"
 ECHO;
 	YY_BREAK
-#line 2132 "lex.yy.c"
+#line 2151 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(GRAMATICA):
 case YY_STATE_EOF(AUTOMAT):
@@ -3205,7 +3224,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 642 "program.l"
+#line 659 "program.l"
 
 
 	/*analiza se face dintr-un singur fisier*/
@@ -3217,28 +3236,7 @@ int main(int argc, char** argv){
 	yyin = fopen(argv[1], "r");
 	yylex();
 	
-		/*
-	printf("variabile globale: \n");
-	int i;
-	for (i = 0; i < nr_variabile; i++) {
-		printf("%s ", variabile[i]);
-	}
-	printf("\nvalorile pentru variabilele gloabale: \n");
 	
-	for (i = 0; i < nr_valori; i++) {
-		printf("%s %s\n", valori_variabile[i][0], valori_variabile[i][1]);
-	}
-	
-	printf("variabile locale: \n");
-	for (i = 0; i < nr_variabile_interne; i++) { 
-		printf("%s ", variabile_interne[i]);
-	}
-	
-	printf("\nvalorile pentru variabilele interne: \n");
-	
-	for (i = 0; i < nr_valori_interne; i++) {
-		printf("%s %s\n", valori_variabile_interne[i][0], valori_variabile_interne[i][1]);
-	} */
 	return 0;
 }
 

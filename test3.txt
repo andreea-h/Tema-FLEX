@@ -75,8 +75,9 @@ grammar4 ::= Grammar (
 	alphabet :: { a, b, c } ;
 	start_symbol :: S ;
 	
+	%apare tranzitia S->e dar S nu mai apare in partea dreapta a nici unei alte productii
 	S -> e | T ;
-	T -> a&T&B&C | S&a&B&C ;
+	T -> a&T&B&C | a&B&C ;
 	C&B -> B&C ;
 	a&B -> a&b ;
 	b&B -> b&b ;

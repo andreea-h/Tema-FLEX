@@ -1,3 +1,5 @@
+variable y ::= { a, b } ;
+
 grammar1 ::= Grammar (
 	nonterminals :: { S, S1, S2 } ;
 	start_symbol :: S ; %comentariu 
@@ -6,7 +8,7 @@ grammar1 ::= Grammar (
 	%productii:
 	S -> y&S | a&S1 ;
 	S1 -> b&S2 | e ;
-	%S2 -> S1&a&S2 | y ;
+	%S2 -> S1&a&S2 | y ; productie ignorata
 	S2 -> a&S2 | y ;
 ) ;;
 

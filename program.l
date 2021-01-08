@@ -341,12 +341,22 @@ stiva 			{alfabet}{concatenare}
 <TIP_2_3_GRAMATICA>"&"				{ } 
 	/*s-a terminat analiza productiei de pe linia curenta; la acest match stim ca productia tocmai analizata indica GR*/
 <TIP_2_3_GRAMATICA>" ;\n"			{ BEGIN(GRAMATICA); }
-<TIP_2_3_GRAMATICA>" ;\n) ;;\n"		{ printf("Tipul gramaticii: GR\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); exceptie_productie = false; caz_special = false; check_start_symbol = 0; }
+<TIP_2_3_GRAMATICA>" ;\n) ;;\n"		{ printf("Tipul gramaticii: GR\n");
+									  BEGIN(INITIAL); print_alfabet(); 
+									  free_buffers(); 
+									  exceptie_productie = false; 
+									  caz_special = false; 
+									  check_start_symbol = 0; 
+									}
 <TIP_2_3_GRAMATICA>.|\n				{ }
 
 	/*daca dupa un neterminal avem alti neterminali sau terminali, gramatica nu poate fi GR*/
 	/*se trece in starea TIP_2_1_GRAMATICA unde se verifica partea stanga a productiilor pt a distinge intre GIC si GDC*/
-<VERIFICA_TIP_3>"&"{alfabet}		{ if (strcmp(yytext, simbol_start) == 0) { check_start_symbol++; } BEGIN(TIP_2_1_GRAMATICA); }	
+<VERIFICA_TIP_3>"&"{alfabet}		{ if (strcmp(yytext, simbol_start) == 0) 
+										{ 
+											check_start_symbol++; 
+										} 
+										BEGIN(TIP_2_1_GRAMATICA); }	
 <VERIFICA_TIP_3>" "					{ yyless(0); yy_pop_state(); }
 
 
@@ -355,7 +365,13 @@ stiva 			{alfabet}{concatenare}
 <TIP_2_1_GRAMATICA>"\t"{alfabet}" -> "  	{ }
 	/*daca este identificat simbol de concatenare in partea stanga a productiei, gramatica nu poate fi GIC*/
 <TIP_2_1_GRAMATICA>"\t"{alfabet}"&"	 		{ st = 1; BEGIN(TIP_1_0_GRAMATICA_ST); }
-<TIP_2_1_GRAMATICA>" ;\n) ;;\n"				{ printf("Tipul gramaticii: GIC\n"); BEGIN(INITIAL); print_alfabet(); free_buffers(); check_start_symbol = 0; exceptie_productie = false; caz_special = false; check_start_symbol = 0;}
+<TIP_2_1_GRAMATICA>" ;\n) ;;\n"				{ printf("Tipul gramaticii: GIC\n"); 
+											  BEGIN(INITIAL); print_alfabet(); 
+											  free_buffers(); 
+											  check_start_symbol = 0; 
+											  exceptie_productie = false; 
+											  caz_special = false; 
+											  check_start_symbol = 0;}
 	/*la identificarea lui e, este verificat daca apare tranzitia simbol_start->e*/
 <TIP_2_1_GRAMATICA>"e"						{ 
 	if (exceptie_productie == true) {
@@ -496,7 +512,6 @@ stiva 			{alfabet}{concatenare}
 									
 	/*este identificata starea 'de start' a unei tranzitii*/
 <DEFINIRE_TRANZITII>{alfabet}" -> (" {  yyless(yyleng - 5); 
-										/*printf("\tm(%s, ", yytext);*/ 
 										stare = strdup(yytext); /*este memorata starea initiala pentru a fi afisata ulterior*/
 										BEGIN(TRANZITIE_AS);
 										/*copie_tranzitie1 este folosit ulterior la afisare daca exista variabile in tranzitie*/
@@ -504,12 +519,15 @@ stiva 			{alfabet}{concatenare}
 									    sprintf(copie_tranzitie1, "\tm(%s, ", yytext); 
 									    /*este memorat string-ul aferent incepututlui tranzitiei curente*/
 									 }
-	/*regula care se aplica cand sunt definite mai multe tranzitii pentru aceeasi stare*/
+	/*regula care afiseaza starea initiala dintr-o tranzitie*/
+	/*la acet moment analizorul a identificat si simbolul de pe banda*/
+	/*sirul curent match-uit va fi reanalizat pt afisarea simbolului de pe banda*/
 <DEFINIRE_TRANZITII>{alfabet}		{ printf("\tm(%s, ", stare); 
 									  BEGIN(TRANZITIE_AS); yyless(0); 
 									}
 									
-	/*este identificat elementul din alfabet prezent in tranzitia curenta analizata*/
+	/*este identificat elementul din alfabet prezent in tranzitia curenta analizata (adica valoarea de pe banda)*/
+	/*trebuie verificat daca simbolul asociat sirului curent de pe banda este variabila globala/interna*/
 <TRANZITIE_AS>{alfabet}", "			{ yyless(yyleng - 2);
 									  /*verifica daca simbolul analizat este variabila interna definitiei curente*/
 									  if (verifica_variabila_interna(yytext) == 0) { /*simbolul nu este variabila interna*/
@@ -523,23 +541,21 @@ stiva 			{alfabet}{concatenare}
 										  }
 									  }
 									  else {
-									  	/*printf("\tm(%s, ", stare); starea initiala memorata */
 									  	variabila_interna = true;
 									  	printf("%s, ", valori_variabile_interne[prima_aparitie_interna(yytext)][1]);
 										variabila_tranzitie = strdup(yytext);
 									  }
 									}
-									
+	/*este identificat simbolul asociat cu varful stivei*/								
 <TRANZITIE_AS>{alfabet}" /" 		{ yyless(yyleng - 2); printf("%s) = ", yytext); 
 									  char* aux = (char*)malloc(100 * sizeof(char)); 
 									  sprintf(aux, "%s) = ", yytext);
 									  copie_tranzitie2 = strdup(aux);
 									}
-	/*identifica noul varf al stivei*/										
+	/*este identificat si memorat noul sir care se pune in varful stivei*/										
 <TRANZITIE_AS>{stiva}{1,}" -> "|{alfabet}" -> "		{ yyless(yyleng - 4);
-									  			  stiva = strdup(yytext); 
-											    }
-
+									  			  	  stiva = strdup(yytext); 
+											   		 }
 	/*este identificata starea urmatoare dintr-o tranzitie*/	
 	/*deci s-a incheiat definirea unei tranzitii*/								  								  	
 <TRANZITIE_AS>{alfabet}" ;"		    { yyless(yyleng - 2); 
@@ -604,6 +620,7 @@ stiva 			{alfabet}{concatenare}
 							             yy_push_state(before_comment_state);
 									     BEGIN(COMENTARIU_LINIE);
 									   }
+	/*este regula pe care se face match dupa identificarea starii de start din definirea unei tranzitii*/									   	
 <TRANZITIE_AS>\n					   { BEGIN(DEFINIRE_TRANZITII); }			   
 <DEFINIRE_TRANZITII>.|\n			   { }					   
 <TRANZITIE_AS>. 					   { }
@@ -649,27 +666,6 @@ int main(int argc, char** argv){
 	yyin = fopen(argv[1], "r");
 	yylex();
 	
-		/*
-	printf("variabile globale: \n");
-	int i;
-	for (i = 0; i < nr_variabile; i++) {
-		printf("%s ", variabile[i]);
-	}
-	printf("\nvalorile pentru variabilele gloabale: \n");
 	
-	for (i = 0; i < nr_valori; i++) {
-		printf("%s %s\n", valori_variabile[i][0], valori_variabile[i][1]);
-	}
-	
-	printf("variabile locale: \n");
-	for (i = 0; i < nr_variabile_interne; i++) { 
-		printf("%s ", variabile_interne[i]);
-	}
-	
-	printf("\nvalorile pentru variabilele interne: \n");
-	
-	for (i = 0; i < nr_valori_interne; i++) {
-		printf("%s %s\n", valori_variabile_interne[i][0], valori_variabile_interne[i][1]);
-	} */
 	return 0;
 }

@@ -22,14 +22,14 @@ grammar1_v1 ::= Grammar (
 	
 	S -> a&a&B&C | a&b&C | e ;
 	C&B -> B&C ;
-	b&B -> b&b ;
+	b&B -> S&b&b ;
 	b&C -> b&c ;
 	c&B -> B&c&S ;
 	c&C -> c&c ;
 ) ;;
 
 % Automatul pentru w w^r unde w este din {a, b}*
-automat_cu_stari_finale ::= PushDownAutomata (
+automat_cu_stiva_stari_finale ::= PushDownAutomata (
 	alphabet :: { a, b } ;
 	stack_alphabet :: { Z0, a, b } ;
 	states :: { q0, q1, q2, q3 } ;
@@ -84,7 +84,7 @@ grammar3 ::= Grammar (
 	b&B -> b&b ;
 	b&C -> b&c ;
 	/*S apare in partea dreapta a unei productii->GFR*/
-	c&B -> S&B&c ;
+	c&B -> B&S&c ;
 	c&C -> c&c ;
 ) ;;
 
