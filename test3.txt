@@ -19,7 +19,7 @@ automata0 ::= PushDownAutomata (
 	
 	q2 -> (
 		0, Z0 / 0&0&Z0 -> q2 ; 
-		0, 0 / 0&0&0 -> q4 ;  
+		0, 0 / 0&0&0 -> q4 ;   /*comentariu*/
 	) ;
 	
 	%comment3
@@ -44,6 +44,8 @@ grammar1 ::= Grammar (
 	alphabet :: { a, b } ;
 	start_symbol :: S ;
 	
+	% Aceasta linie va fi ignorata
+		
 	S -> a&S&b | a&b ;
 ) ;;
 
@@ -55,7 +57,7 @@ grammar2 ::= Grammar (
 	alphabet :: { a, b } ;
 	start_symbol :: S ;
 	
-	S -> a&S | b&B ;
+	S -> a&S | b&B ; %acesta este un comentariu
 	B -> bB | e ;
 ) ;;
 */
@@ -128,8 +130,8 @@ grammar8 ::= Grammar (
 	start_symbol :: S ;
 	
 	S -> a&S&d | A | b&C&d ;
-	%A -> a&A&c | B ;
-	B -> b&B&c | e ;
+	A -> a&A&c | B ;
+	B -> b&B&c | e ; /*acesta este un comentariu*/
 	C -> b&C&d | B ;
 ) ;;
 

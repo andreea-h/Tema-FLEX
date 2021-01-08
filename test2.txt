@@ -6,7 +6,7 @@ grammar1 ::= Grammar (
 	start_symbol :: S ;
 	
 	S -> y&S | a&S1 ;
-	S1 -> b&S2 | e ;
+	S1 -> b&S2 | e ; /*comment*/
 	S2 -> a&S2 | y ;
 ) ;;
 
@@ -44,6 +44,7 @@ grammar2 ::= Grammar (
 	alphabet :: { a, b, c } ;
 	start_symbol :: S1 ;
 	
+	%linie igonorata
 	S1 -> y&S2 ;
 	S2 -> y&S1 | e ;
 ) ;;

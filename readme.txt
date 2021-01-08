@@ -7,6 +7,10 @@ Tema FLEX - Limbaje formale si automate
 	Pentru rularea temei am folosit comanda "make run TEST_FILE=test.txt", unde 
 	test.txt este numele fisierul de intrare care se doreste a fi analizat dintre 
 fisierele prezente in arhiva temei.
+	In fiecare din cele 4 fisiere de input am definit mai multe gramatici si 
+automate pentru a surprinde diversele situatii care pot aparea in analiza 
+acestora.
+
 
 	Pentru identificarea definitiei unui automat sau a unei gramatici, am 
  definit starea exclusiva numita GASESTE_NUME. In aceasta stare se poate face 
@@ -84,29 +88,60 @@ fisierele prezente in arhiva temei.
 ---------------------------------------------------------------------------------
  ->Detalii despre parsarea si afisarea gramaticilor
 
- 	In cazul gramaticilor am realizat o abordare in care am considerat in prima 
-faza ca este necesar sa memoram elementele gramaticii (terminalii, neterminalii, 
-simbolul de start) pentru ca la determinarea tipului de gramatica sa putem face 
-diferenta intre terminali si neterminali.
-O varianta mai simpla ar fi fost sa tin cont de conventia conform careia terminalii
-se scriu cu litere mici iar neterminalii cu litere mari, facand in acest fel diferenta
-intre cele 2 tipuri de elemente.
-	In implementare am folosit doar reguli pentru care se poate face match la un
+ 	In cazul gramaticilor am realizat o abordare in cadrul careia am tinut cont
+ de respectarea conventiei conform careia terminalii pot fi scrisi cu litere mici 
+ si/sau cifre, iar neterminalii au in denumirea formata din litere mari (eventual
+ si cifre).
+ 	Pentru o solutie mai generala implementata anterior considerasem si situatia
+ in care terminalii ar fi litere mari si pentru aceasta memorasem terminalii
+ respectiv neterminalii, in cadrul regulilor care faceau match pe sirul de
+ la intrare simbol cu simbol, memorand simbolul dat de yytext in multimea 
+ corespunzatoare. Ulterior am renuntat la acesta idee, intrucat la analiza 
+ productiilor pentru a identifica diferenta terminal/neterminal apelam functii
+ care analizau explicit yytext pt a afla multimea in care este (de terminali
+ sau neterminali), fapt care nu se incardra in obiectivele temei.
+ 	De aceea am ales abordarea in care consider respectata conventia de notare
+ a terminalelor/neterminalelor. Totusi, solutia prezentata poate fi usor adaptata 
+ si la situatia descrisa la inceput.
+ 	Multimea terminalelor este memorata, facandu-se match pe rand pe fiecare element
+ al acesteia in starea MEMORARE_ALFABET_GRAMATICA; acestea este afisata dupa
+ identificarea tipului de gramatica.
+	In implementare am folosit reguli pentru care se poate face match la un
 moment dat pe un sir care sa contina maxim 2 simboluri din alfabet (caz in care
-este prezent intre acestea simbolul de concatenare); prin simbol desemnez acele
-siruri de forma {alfabet}, unde alfabet este un sir format din oricate litere mari
-/mici si/sau cifre. Am analizat productiile simbol cu simbol, in partea de actiuni 
+este prezent intre acestea simbolul de concatenare); prin simbol desemnez orice 
+sir descris de expresia {alfabet}.
+	Am analizat productiile simbol cu simbol, in partea de actiuni 
 stabilind starea urmatoare in functie de starea curenta si de natura simbolului 
 (terminal/neterminal).
-	Am definit starile exclusive MEMORARE_ALFABET_GRAMATICA, MEMORARE_NETERMINALI,
-MEMORARE_SIMBOL_START, in fiecare dintre ele facandu-se pe rand match pe cate un 
-simbol memorat ulterior in vectorul corespunzator.
-
+	
 	La analiza productiilor, am folosit faptul ca daca in partea dreapta a 
 productiei avem doar un neterminal, gramatica ar putea fi una regulata sau una 
 independenta de context. Astfel, am definit starea TIP_2_3_GRAMATICA care verifica
-daca gramatica ar putea fi una regulata.
-	
+daca gramatica ar putea fi una regulata prin analiza membrilor din partea dreapta
+a productiilor. Daca identificam prezenta concatenarii dupa ce am facut match pe
+un neterminal, deducem ca gramatica nu poate fi regulata, deci tipul cel mai
+restrictiv in care s-ar putea incadra este cel al gramaticii independente de context.
+Semnaland asta, trecem in starea TIP_2_1_GRAMATICA unde scopul este va vedem daca
+gramatica ar putea fi GIC. Pentru asta trebuie sa verificam daca la stanga 
+productiilor apare un singur neterminal. Daca gasim concatenare la stanga productiilor,
+deducem ca gramatica nu poate fi GIC, deci este maxim de tipul 1, adica GDC. 
+In acest caz se trece in starea TIP_1_0_GRAMATICA_ST unde suntem plasati mereu cu
+analizorul la stanga productiilor si contorizam numarul de terminali si neterminali
+care apar. Daca se face match pe "->", trecem in starea TIP_1_0_GRAMATICA_DR
+unde contorizam cati terminali si neterminal se afla la dreapta productiei. Cand
+facem match pe "|" verificam daca st > dr, caz in care am putea deduce ca 
+gramatica este GFR, oprind analiza. Daca pentru toate productiile gasim ca 
+st <= dr, putem incheia afisand ca gramatica este GDC.
+	Am tratat in mod special cazul in care la GDC poate aparea productia S->e, 
+cu conditia ca S sa nu mai apara in partea dreapta a nici unei alte productii.
+Pentru aceasta, a fost nevoie mai intai sa identific prezenta simbolului de start
+la stanga unei productii, si apoi sa verific daca "e" apare in partea dreapta 
+a acelei productii. De asemenea, a fost nevoie sa contorizez aparitiile simbolului
+de start in partea dreapta a productiilor pentru a verifica ulterior, in cazul in 
+care s-a identificat productia S->e, ca numarul de aparitii al lui S in partea 
+dreapta a productiilor este 0.
+	Am adaugat in comentarii mai multe detalii despre varibilele folosite 
+la identificarea exceptiei si semnificatia fiecareia.
 
 
 ---------------------------------------------------------------------------------

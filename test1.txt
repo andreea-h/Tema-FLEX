@@ -8,7 +8,7 @@ grammar1 ::= Grammar (
 	%productii:
 	S -> y&S | a&S1 ;
 	S1 -> b&S2 | e ;
-	%S2 -> S1&a&S2 | y ; productie ignorata
+	%S2 -> S1&a&S2 | y ; productie ignorata->gramatica regultata
 	S2 -> a&S2 | y ;
 ) ;;
 
@@ -28,7 +28,7 @@ grammar3 ::= Grammar (
 	start_symbol :: S ;
 	
 	S -> S1&S2 ; %gramatica independenta de context
-	S1 -> a&S1&a | b&S1&b | e ;
+	S1 -> a&S1&a | b&S1&b | e ; %comentariu
 	S2 -> a&S2 | b&S2 | e ;
 ) ;;
 %alt comentariu

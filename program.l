@@ -322,7 +322,7 @@ terminal        [a-z0-9a-z0-9]+
 <TIP_2_3_GRAMATICA>"&"				{ } 
 	/*s-a terminat analiza productiei de pe linia curenta; la acest match stim ca productia tocmai analizata indica GR*/
 <TIP_2_3_GRAMATICA>" ;\n"			{ BEGIN(GRAMATICA); }
-<TIP_2_3_GRAMATICA>" ;\n) ;;\n"		{ printf("Tipul gramaticii: GR\n");
+<TIP_2_3_GRAMATICA>" ;\n) ;;"		{ printf("Tipul gramaticii: GR\n");
 									  BEGIN(INITIAL); print_alfabet();  /*afiseaza alfabetul gramaticii*/
 									  free_buffers(); 
 									  exceptie_productie = false; 
@@ -371,9 +371,17 @@ terminal        [a-z0-9a-z0-9]+
 
 
 	/*sunt numarate simbolurile din partea stanga a productiei curente*/
-<TIP_1_0_GRAMATICA_ST>{alfabet}			{ st++; }
-<TIP_1_0_GRAMATICA_ST>" -> " 			{ BEGIN(TIP_1_0_GRAMATICA_DR); }
-<TIP_1_0_GRAMATICA_ST>.					{ }
+<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>{alfabet}			{ st++; }
+<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>" -> " 			{ BEGIN(TIP_1_0_GRAMATICA_DR); }
+<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>"%"				{ int before_comment_state = YYSTATE;
+							              				  yy_push_state(before_comment_state);
+									      				  BEGIN(COMENTARIU_LINIE);
+									    				 }
+<TIP_1_0_GRAMATICA_ST>"/*"				{ int before_comment_state = YYSTATE;
+							              yy_push_state(before_comment_state);
+									      BEGIN(COMENTARIU);
+									     }									    
+<TIP_1_0_GRAMATICA_ST>.|\n					{ }
 
 <TIP_1_0_GRAMATICA_DR>{alfabet}			{ 
 	if (strcmp(yytext, "e") != 0) {
@@ -401,7 +409,7 @@ terminal        [a-z0-9a-z0-9]+
 	dr = 0;
 }	
 	/*la finalul liniei este resetat st; la acest moment gramatica poate fi GDC sau GFR; daca st>dr gramatica este GFR*/
-<TIP_1_0_GRAMATICA_DR>";\n"			{ 
+<TIP_1_0_GRAMATICA_DR>";"			{ 
 	if (st > dr) {
 		printf("Tipul gramaticii: GFR\n"); 
 		BEGIN(INITIAL); 
