@@ -24,7 +24,7 @@ grammar1_v1 ::= Grammar (
 	C&B -> B&C ;
 	b&B -> S&b&b ;
 	b&C -> b&c ;
-	c&B -> B&c&S ;
+	c&B -> S&B&c ;
 	c&C -> c&c ;
 ) ;;
 
@@ -73,6 +73,23 @@ grammar2 ::= Grammar (
 	S -> a&S&b | a&S&a | b&S&a | b&S&b | e ;
 ) ;;
 
+
+/*GFR*/
+grammar4 ::= Grammar (
+	nonterminals :: { S, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	S -> a&a&B&C | a&b&C ;
+	C&B&C -> B&C ;
+	b&B -> b&b ;
+	B&C -> b&c ; /*GRAMATICA FARA RESTRICTII*/
+	c&B -> B&S&c ;
+	c&C -> c&c ;
+) ;;
+
+
+
 /*GFR*/
 grammar3 ::= Grammar (
 	nonterminals :: { S, B, C } ;
@@ -82,9 +99,9 @@ grammar3 ::= Grammar (
 	S -> a&a&B&C | e | a&b&C ;
 	C&B -> B&C ;
 	b&B -> b&b ;
-	b&C -> b&c ;
+	b&C -> S&b&c ;
 	/*S apare in partea dreapta a unei productii->GFR*/
-	c&B -> B&S&c ;
+	c&B -> B&c ;
 	c&C -> c&c ;
 ) ;;
 

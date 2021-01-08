@@ -83,13 +83,30 @@ fisierele prezente in arhiva temei.
 
 ---------------------------------------------------------------------------------
  ->Detalii despre parsarea si afisarea gramaticilor
- 	
 
+ 	In cazul gramaticilor am realizat o abordare in care am considerat in prima 
+faza ca este necesar sa memoram elementele gramaticii (terminalii, neterminalii, 
+simbolul de start) pentru ca la determinarea tipului de gramatica sa putem face 
+diferenta intre terminali si neterminali.
+O varianta mai simpla ar fi fost sa tin cont de conventia conform careia terminalii
+se scriu cu litere mici iar neterminalii cu litere mari, facand in acest fel diferenta
+intre cele 2 tipuri de elemente.
+	In implementare am folosit doar reguli pentru care se poate face match la un
+moment dat pe un sir care sa contina maxim 2 simboluri din alfabet (caz in care
+este prezent intre acestea simbolul de concatenare); prin simbol desemnez acele
+siruri de forma {alfabet}, unde alfabet este un sir format din oricate litere mari
+/mici si/sau cifre. Am analizat productiile simbol cu simbol, in partea de actiuni 
+stabilind starea urmatoare in functie de starea curenta si de natura simbolului 
+(terminal/neterminal).
+	Am definit starile exclusive MEMORARE_ALFABET_GRAMATICA, MEMORARE_NETERMINALI,
+MEMORARE_SIMBOL_START, in fiecare dintre ele facandu-se pe rand match pe cate un 
+simbol memorat ulterior in vectorul corespunzator.
 
-
-
-
-
+	La analiza productiilor, am folosit faptul ca daca in partea dreapta a 
+productiei avem doar un neterminal, gramatica ar putea fi una regulata sau una 
+independenta de context. Astfel, am definit starea TIP_2_3_GRAMATICA care verifica
+daca gramatica ar putea fi una regulata.
+	
 
 
 ---------------------------------------------------------------------------------
@@ -122,4 +139,11 @@ Delatii despre platforma pe care am realizat tema:
 	Am rulat tema pe Linux, versiunea Ubuntu 20.04.1, versiunea de gcc 
 folosita este [gcc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0] iat versiunea flex
 este [flex 2.6.4].
+
+--------------------------------------------------------------------------------
+Observatii finale
+	Am incercat sa organizez codul cat mai bine dar pe masura ce descopeream 
+noi cazuri la input care trebuiau tratate, regulile se complicau din ce in ce 
+mai mult. Am adaugat in cod mai multe comentarii pentru a descrie operatiile 
+efectuate.
 
