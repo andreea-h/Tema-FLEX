@@ -5,8 +5,36 @@ grammar1 ::= Grammar (
 	alphabet :: { a, b, c } ;
 	start_symbol :: S ;
 	
-	S -> a&a&B&C | a&b&C ;
+	S -> a&a&B&C | a&b&C | e ;
+	C&B -> B&C ;
+	b&B -> b&b ;
+	b&C -> b&c ;
+	c&B -> B&c ; %comment
+	c&C -> c&c ;
+) ;;
+
+%gramatica fara restrictii
+grammar1_1 ::= Grammar (
+	nonterminals :: { S, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	S -> a&a&B&C | a&b&C ; /*spre deosebire de grammmar1, aici S apare si in partea dreapta a altei productii*/
 	S -> e ;
+	C&B -> B&C ;
+	b&B -> b&b ;
+	b&C -> b&c&S ;
+	c&B -> B&c ; %comment
+	c&C -> c&c ;
+) ;;
+
+%gramatica fara restrictii
+grammar1_2 ::= Grammar (
+	nonterminals :: { S, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	S -> a&a&B&C&S | a&b&C | e ; /*spre deosebire de grammmar1, aici S apare si in partea dreapta a altei productii*/
 	C&B -> B&C ;
 	b&B -> b&b ;
 	b&C -> b&c ;
@@ -89,19 +117,19 @@ grammar4 ::= Grammar (
 	c&C -> c&c ;
 ) ;;
 
-/*GFR*/
-grammar3 ::= Grammar (
+/*GDC*/
+grammar5 ::= Grammar (
 	nonterminals :: { S, B, C } ; %comentariu
 	alphabet :: { a, b, c } ;
 	start_symbol :: S ;
 	
-	C&B -> B&C&S ;
+	S -> a&a&B&C | e ;
+	C&B -> B&C ;
 	b&B -> b&b ;
 	b&C -> b&c ; %COMENTARIU
-	/*S apare in partea dreapta a unei productii->GFR*/
+	/*S nu mai apare in partea dreapta a unei productii->GFR*/
 	c&B -> B&c ;
 	c&C -> c&c ;
-	S -> a&a&B&C | e ;
 ) ;;
 
 % Definitie automat cu stiva

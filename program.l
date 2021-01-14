@@ -1,4 +1,4 @@
-	/*student: Horovei Andreea-Georgiana, 335CC*/
+/*student: Horovei Andreea-Georgiana, 335CC*/
 %{ 
 	#include<stdio.h>
 	#include<string.h>
@@ -7,7 +7,8 @@
 	#define MAX_VARIABLES 200 /*numarul maxim de variabile care pot aparea in fisierul de intrare*/
 	
 	int max_chars = 200;
-	
+	char* grammar = " ::= Grammar";
+	char* automat = " ::= PushDownAutomata";
 	char* stiva; /*retine ce trebuie pus pe stiva la o tranzitie*/
 	char* stare; /*retine starea curenta pentru care se face scrierea unei tranzitii*/
 	char* name;
@@ -153,8 +154,10 @@
 	bool exceptie_productie = false;/*este true cand productia curenta care se analizeaza are in partea stanga DOAR simbolul de start*/
 	int check_start_symbol = 0; /*retine de cate ori apare simbolul de start in partea dreapta a unei productii pt GDC sau GFR*/
 	
-	bool tip_gasit; /*a fost identificat si afisat tipul gramaticii*/
-	bool maxim_gdc; /*s-a identificat ca tipul cel mai restrictiv al gramaticii este gdc*/
+	bool maxim_gdc; /*este true daca tipul cel mai restrictiv in care s-ar incadra gramatica este GIC*/
+	bool tranz_e; /*este true daca a fost identificata o tranzitie de forma neterminal->e (neterminal!=S) la gfr*/
+	
+	bool neterminal_st; /*este true daca in partea stanga a productiei avem un singur neterminal*/
 %}
 
 %option stack
@@ -298,6 +301,9 @@ terminal        [a-z0-9a-z0-9]+
 	if (strcmp(simbol_start, yytext + 1) == 0) {
 		exceptie_productie = true;
 	}
+	else {
+		neterminal_st = true; /*la stanga productiei gasim in simbol neterminal diferit de simbolul de start*/
+	}
 }
 	/*daca in partea stanga a unei productii este gasit &, gramatica poate fi maxim GDC*/
 <GRAMATICA>"\t"{alfabet}"&"{alfabet}	{ st = 2; BEGIN(TIP_1_0_GRAMATICA_ST); }
@@ -312,40 +318,35 @@ terminal        [a-z0-9a-z0-9]+
 	}		
 }
 
-<TIP_2_3_GRAMATICA>"e"				{	if (exceptie_productie == true) {
-											caz_special = true;
+<TIP_2_3_GRAMATICA>"e"			    {
+										if (exceptie_productie == true) {
+												caz_special = true;
 										}
-									}		
+										
+										if (neterminal_st == true) {
+											tranz_e = true;
+										}	
+									}
 
 <TIP_2_3_GRAMATICA>{terminal}		{ }
+
 <TIP_2_3_GRAMATICA>"&"				{ } 
 	/*s-a terminat analiza productiei de pe linia curenta; la acest match stim ca productia tocmai analizata indica GR*/
-<TIP_2_3_GRAMATICA>" ;\n"			{ BEGIN(GRAMATICA); }
-<TIP_2_3_GRAMATICA>" ;\n) ;;"		{ if (tip_gasit_gfr == false && maxim_gdc == false) {
-										printf("Tipul gramaticii: GR\n");
-										print_alfabet(); /*afiseaza alfabetul gramaticii*/
-										tip_gasit = true;
-									  }
-									  else if (maxim_gdc == true && tip_gasit == false) {
-									  	printf("Tipul gramaticii: GDC\n");
-										print_alfabet();	
-									  }
-									  else {
-									  	printf("Tipul gramaticii: GIC\n");
-										print_alfabet();
-									  }
-								      BEGIN(INITIAL);   
+<TIP_2_3_GRAMATICA>" ;\n"			{ BEGIN(GRAMATICA); neterminal_st = false; }
+<TIP_2_3_GRAMATICA>" ;\n) ;;"		{ printf("Tipul gramaticii: GR\n");
+									  BEGIN(INITIAL); print_alfabet();  /*afiseaza alfabetul gramaticii*/
 									  free_buffers(); 
 									  exceptie_productie = false; 
 									  caz_special = false; 
-									  check_start_symbol = 0;  
+									  check_start_symbol = 0;
+									  neterminal_st = false; 
+									  tranz_e = false;
 									}
 <TIP_2_3_GRAMATICA>.|\n				{ }
 
 	/*daca dupa un neterminal avem alti neterminali sau terminali, gramatica nu poate fi GR*/
 	/*se trece in starea TIP_2_1_GRAMATICA unde se verifica partea stanga a productiilor pt a distinge intre GIC si GDC*/
-<VERIFICA_TIP_3>"&"{alfabet}		{ if (strcmp(yytext, simbol_start) == 0) 
-										{ 
+<VERIFICA_TIP_3>"&"{alfabet}		{ if (strcmp(yytext, simbol_start) == 0) { 
 											check_start_symbol++; 
 										} 
 										BEGIN(TIP_2_1_GRAMATICA); }	
@@ -357,73 +358,96 @@ terminal        [a-z0-9a-z0-9]+
 <TIP_2_1_GRAMATICA>"\t"{alfabet}" -> "  	{ }
 	/*daca este identificat simbol de concatenare in partea stanga a productiei, gramatica nu poate fi GIC*/
 <TIP_2_1_GRAMATICA>"\t"{alfabet}"&"	 		{ st = 1; BEGIN(TIP_1_0_GRAMATICA_ST); }
-<TIP_2_1_GRAMATICA>" ;\n) ;;\n"				{ 
-											  if (tip_gasit_gfr == false) {
-												if ((caz_special == true) && (check_start_symbol == 0)) {
-													printf("Tipul gramaticii: GDC\n");
-													print_alfabet(); 
-													free_buffers();
-													tip_gasit = true;
-												}
-											  	else if ((caz_special == true) && (check_start_symbol != 0)) {
-													/*daca exista S->e si S apare in partea dreapta a unei productii, avem GFR*/
-													printf("Tipul gramaticii: GFR\n");
-													print_alfabet(); 
-													free_buffers();
-													tip_gasit = true;
-												}
-											  }
-											  if (tip_gasit == false) {
-												  printf("Tipul gramaticii: GIC\n"); 
-												  print_alfabet(); 
-											  }
-											  BEGIN(INITIAL); 
+<TIP_2_1_GRAMATICA>" ;\n) ;;\n"				{ printf("Tipul gramaticii: GIC\n"); 
+											  BEGIN(INITIAL); print_alfabet(); 
 											  free_buffers(); 
-										      check_start_symbol = 0; 
-										      exceptie_productie = false; /*reseteaza valorile la finalul productiei curente*/
-										      caz_special = false; 
-										      tip_gasit = false;
-										      check_start_symbol = 0;
+											  check_start_symbol = 0; 
+											  exceptie_productie = false; /*reseteaza valorile la finalul productiei curente*/
+											  caz_special = false; 
+											  check_start_symbol = 0;
+											  neterminal_st = false;
+											  tranz_e = false;
 											}
+										
 	/*la identificarea lui e, este verificat daca apare tranzitia simbol_start->e*/
 <TIP_2_1_GRAMATICA>"e"						{ 
 	if (exceptie_productie == true) { /*daca a fost gasit simbolul de start in partea stanga a unei productii*/
 		/*a fost identificata tranzitia S->e*/
 		caz_special = true; 
 	}
-	st = 0;
+	if (neterminal_st == true) {
+		tranz_e = true;
+	}
 }
 <TIP_2_1_GRAMATICA>{alfabet}				{
 	if (strcmp(yytext, simbol_start) == 0) {
 		check_start_symbol++;
 	}
 }
-<TIP_2_1_GRAMATICA>\n						{ exceptie_productie = false; }
+<TIP_2_1_GRAMATICA>\n						{ }
 <TIP_2_1_GRAMATICA>.						{ }
 
 
 
 	/*sunt numarate simbolurile din partea stanga a productiei curente*/
-<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>{alfabet}			{ st++; }
-<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>" -> " 				{ BEGIN(TIP_1_0_GRAMATICA_DR); }
-<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>"%"					{ int before_comment_state = YYSTATE;
-							              				 		 yy_push_state(before_comment_state);
-									      				  		 BEGIN(COMENTARIU_LINIE);
-									    				    }
+<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>{alfabet}	    { st++; }
+<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>" -> " 			{ BEGIN(TIP_1_0_GRAMATICA_DR); }
+<TIP_1_0_GRAMATICA_ST,TIP_2_1_GRAMATICA>"%"				{ int before_comment_state = YYSTATE;
+							              				  yy_push_state(before_comment_state);
+									      				  BEGIN(COMENTARIU_LINIE);
+									    				 }
 <TIP_1_0_GRAMATICA_ST>"/*"				{ int before_comment_state = YYSTATE;
 							              yy_push_state(before_comment_state);
 									      BEGIN(COMENTARIU);
-									     }									    
-<TIP_1_0_GRAMATICA_ST>.|\n					{ }
-	
-<TIP_1_0_GRAMATICA_DR>"e"   			{ dr = 0; }
-	/*la acesta regula se ajunge cand in partea dreapta a productiei este identificat un simbol din alfabet diferit de e
-	(pentru e se face match pe regula precedenta)*/
+									    }	
+<TIP_1_0_GRAMATICA_ST>") ;;\n"	        { 
+	if (tranz_e == true) {
+		/*daca a fost gasita o tranzitie de forma neterminal->e si regula |alpha|<=|beta| a fost respectata pt 
+		toate celelalte productii*/
+		printf("Tipul gramaticii: GFR\n");
+		tip_gasit_gfr = true;
+		print_alfabet(); 
+		free_buffers();
+	}			
+	if (maxim_gdc == true && tip_gasit_gfr == false) {
+		
+		if (caz_special == false || ((caz_special == true) && (check_start_symbol == 0))) {
+			printf("Tipul gramaticii: GDC\n");
+			print_alfabet(); 
+			free_buffers();
+		}
+		else if ((caz_special == true) && (check_start_symbol != 0)) {
+			/*daca exista S->e si S apare in partea dreapta a unei productii, avem GFR*/
+			printf("Tipul gramaticii: GFR\n");
+			tip_gasit_gfr = true;
+			print_alfabet(); 
+			free_buffers();
+		}																			
+	}
+	tip_gasit_gfr = false;
+	exceptie_productie = false;
+	caz_special = false;
+	check_start_symbol = 0;
+	maxim_gdc = false;
+	tranz_e = false;
+	st = 0;
+	dr = 0;
+	BEGIN(INITIAL); 	
+}	
+							    								    
+<TIP_1_0_GRAMATICA_ST>.|\n				{ }
+
+<TIP_1_0_GRAMATICA_DR>"e"				{ dr = 0; }
+
 <TIP_1_0_GRAMATICA_DR>{alfabet}			{ 
-	dr++;
+	
+	dr++; 
+	
 	/*sunt numarate aparitiile simbolului de start in partea dreapta a productiilor*/
 	if (strcmp(simbol_start, yytext) == 0) {
-		check_start_symbol++; 
+		if (exceptie_productie == true) {
+			check_start_symbol++; 
+		}
 	}
 }
 	/*trebuie verificat st <= dr pt productia curenta*/
@@ -452,19 +476,23 @@ terminal        [a-z0-9a-z0-9]+
 		caz_special = false;
 		check_start_symbol = 0;
 	}
+	
 	maxim_gdc = true;
 	st = 0; 
 	dr = 0; 
-	BEGIN(GRAMATICA); 
+	BEGIN(TIP_1_0_GRAMATICA_ST); 
 }
-
 	/*daca s-a ajuns la finalul definitiei gramaticii in acesta stare, se verifica daca s-a identificat exceptia cu S->e*/
 <TIP_1_0_GRAMATICA_DR>" ;\n) ;;\n"	{ 
-	
 	/*daca a fost gasita productia S->e, se verifica numarul de aparitii al simbolului de start in partea dreapta a productiilor*/
 	if (tip_gasit_gfr == false) {
-		if (caz_special == false || ((caz_special == true) && (check_start_symbol == 0))) {
+		if ((caz_special == false && tranz_e == false) || ((caz_special == true) && (check_start_symbol == 0) && (tranz_e == false))) {
 			printf("Tipul gramaticii: GDC\n");
+			print_alfabet(); 
+			free_buffers();
+		}
+		else if (((caz_special == true) && (check_start_symbol == 0) && (tranz_e == true))) {
+			printf("Tipul gramaticii: GFR\n");
 			print_alfabet(); 
 			free_buffers();
 		}
@@ -474,16 +502,26 @@ terminal        [a-z0-9a-z0-9]+
 			print_alfabet(); 
 			free_buffers();
 		}
+		/*a fost identificata a tranzitie de forma neterminal->e (neterminal!=S)*/
+		else if (tranz_e == true) {
+			printf("Tipul gramaticii: GFR\n");
+			print_alfabet(); 
+			free_buffers();
+		}
 	}
 	tip_gasit_gfr = false;
 	exceptie_productie = false;
 	caz_special = false;
-	tip_gasit = false;
 	check_start_symbol = 0;
+	maxim_gdc = false;
+	tranz_e = false;
+	neterminal_st = false;
+	neterminal_st = false;
 	st = 0;
 	dr = 0;
 	BEGIN(INITIAL); 
 }
+
 <TIP_1_0_GRAMATICA_DR>.				{ }
 
 <GRAMATICA>.|\n 					{ }
@@ -667,7 +705,7 @@ terminal        [a-z0-9a-z0-9]+
 	/*daca nu au fost define stari finale, se va afisa mesajul aferent cand multimea starilor finale este vida*/
 <*>") ;;"							{ if (afisare_automat == true && stari_finale == false) {
 									  	printf("Starile finale: {}\n");
-								    }
+								      }
 									  BEGIN(INITIAL); 
 									  numarare_stari_as = 0; 
 									  afisare_tranzitii = 0; 
@@ -679,8 +717,8 @@ terminal        [a-z0-9a-z0-9]+
 									  	free_variabile_locale();
 									  	free_valori_var_locale();
 									  }
-									}
-<AUTOMAT>.|\n   					{ }
+									 }
+<AUTOMAT>.|\n   					 { }
 
 %%
 

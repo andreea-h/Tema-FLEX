@@ -12,6 +12,19 @@ grammar1 ::= Grammar (
 	S2 -> a&S2 | y ;
 ) ;;
 
+/*gramatica independenta de context*/
+grammar1_1 ::= Grammar (
+	nonterminals :: { S, S1, S2 } ;
+	start_symbol :: S ; %comentariu 
+	alphabet :: { a, b, c } ; %gramatica regulata
+	
+	%productii:
+	S -> y&S | a&S1 ;
+	S1 -> b&S2 | e ;
+	S2 -> S1&a&S2 | y ; productie ignorata->gramatica va fi regulata
+	S2 -> a&S2 | y ;
+) ;;
+
 grammar2 ::= Grammar (
 	nonterminals :: { S, S1 } ;
 	alphabet :: { a, b } ;

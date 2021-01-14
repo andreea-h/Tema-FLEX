@@ -87,6 +87,23 @@ grammar4 ::= Grammar (
 	b&C -> b&c ;
 ) ;;
 
+% gfr 
+grammar4_1 ::= Grammar (
+	nonterminals :: { S, T, A, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	%apare tranzitia S->e si S apare si in partea dreapta a unei alte productii
+	S -> e | T ;
+	T -> a&T&B&C | a&B&C ;
+	C&B -> B&C ;
+	a&B -> a&b ;
+	b&B -> b&b ;
+	c&C -> c&C ;
+	b&C -> b&c ;
+	S -> a&S ;
+) ;;
+
 /* gramatica regulata pentru (0+1)*011 */
 grammar5 ::= Grammar (
 	nonterminals :: { S, A, B } ;
@@ -195,26 +212,109 @@ grammar9 ::= Grammar (
 	start_symbol :: S ;
 	
 	S -> a&S1&a | b&S1&b ;
-	S1&S -> a&S1 | b&S1 | e ; %gramatica va fi fara restrictii(apare S1&S->e)
+	S1&S -> a&S1 | b&S1 | e ; %gramatica va fi fara restrictii(apar S1&S->e)
 	S1 -> a&S1 | b&S1 | e ;
 ) ;;
 
-% GFR
+% GIC
+grammar_analog_9 ::= Grammar (
+	nonterminals :: { S, S1 } ;
+	alphabet :: { a, b } ;
+	start_symbol :: S ;
+	
+	S -> a&S1&a | b&S1&b ;
+	S1 -> a&S1 | b&S1 | e ;
+) ;;
+
+% GDC
 grammar10 ::= Grammar (
 	nonterminals :: { S, T, A, B, C } ;
 	alphabet :: { a, b, c } ;
 	start_symbol :: S ;
 	
-	%apare tranzitia S->e dar S nu mai apare in partea dreapta a nici unei alte productii
-	S -> e ; /*simbolul de start respecta conditia de caz special de la GDC*/
-	T -> a&B&C | a&B&A&S ;
+	S -> e ; /*S nu mai apare in partea dreapta a unei alte productii*/
+	T -> a&B&C | a&B&A ;
+	C&B -> B&C ;
+	a&B -> a&b&A ;
+	b&B -> b&b ;
+	%A -> e ; /*daca decomentam acesta linie gramatica va fi una fara restricii*/
+	c&C -> c&C ;
+	b&C -> b&c ;
+) ;;
+
+% GFR
+grammar11 ::= Grammar (
+	nonterminals :: { S, T, A, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	T -> a&B&C | a&B&A | e ; /*din cauza T->e gramatica va fi gramatica fara restrictii*/
 	C&B -> B&C ;
 	a&B -> a&b&A ;
 	b&B -> b&b ;
 	c&C -> c&C ;
-	A -> e ; /*gramatica va fi una fara restricii*/
 	b&C -> b&c ;
 ) ;;
 
+% GFC
+grammar12 ::= Grammar (
+	nonterminals :: { S, T, A, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	C&B -> B&C ;
+	a&B -> a&b&A ;
+	b&B -> b&b ;
+	T -> a&B&C | a&B&A ; /*din cauza T->e gramatica va fi gramatica fara restrictii*/
+	T -> e ;
+	c&C -> c&C ;
+	b&C -> b&c ;
+) ;;
 
+% GDC
+grammar13 ::= Grammar (
+	nonterminals :: { S, T, A, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	/*este respectata regula |alpha| <= |beta| pentru toate productiile*/
+	C&B -> B&C ;
+	a&B -> a&b&A ;
+	b&B -> b&b ;
+	T -> a&B&C | a&B&A ;
+	c&C -> c&C ;
+	b&C -> b&c ;
+) ;;
+
+% GFR
+grammar14 ::= Grammar (
+	nonterminals :: { S, T, A, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	S -> e ; /*S nu mai apare in partea dreapta a unei alte productii*/
+	T -> a&B&C | a&B&A ;
+	C&B -> B&C ;
+	a&B -> a&b&A ;
+	A -> e ; /*daca comentam acesta linie gramatica va fi GDC*/
+	b&B -> b&b ;
+	c&C -> c&C ;
+	b&C -> b&c ;
+) ;;
+
+% GDC
+grammar15 ::= Grammar (
+	nonterminals :: { S, T, A, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	S -> e ; /*S nu mai apare in partea dreapta a unei alte productii*/
+	T -> a&B&C | a&B&A ;
+	C&B -> B&C ;
+	a&B -> a&b&A ;
+	%A -> e ; /*daca decomentam acesta linie gramatica va fi GFR*/
+	b&B -> b&b ;
+	c&C -> c&C ;
+	b&C -> b&c ;
+) ;;
 

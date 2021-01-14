@@ -4,24 +4,25 @@ Tema FLEX - Limbaje formale si automate
 
 	Pentru compilarea temei am folosit comanda "make".
 
-	Pentru rularea temei am folosit comanda "make run TEST_FILE=test.txt", unde 
-	test.txt este numele fisierul de intrare care se doreste a fi analizat dintre 
+	Pentru rularea temei am folosit comanda:
+	 "make run TEST_FILE=test.txt", 
+	unde test.txt este numele fisierul de intrare care se doreste a fi analizat dintre 
 fisierele prezente in arhiva temei.
-	In fiecare din cele 4 fisiere de input am definit mai multe gramatici si 
-automate pentru a surprinde diversele situatii care pot aparea in analiza 
-acestora.
+
+	In fiecare din cele 4 fisiere de input am definit mai multe gramatici si automate 
+pentru a surprinde diversele situatii care pot aparea in analiza acestora.
 
 
 	Pentru identificarea definitiei unui automat sau a unei gramatici, am 
  definit starea exclusiva numita GASESTE_NUME. In aceasta stare se poate face 
- match pe sirurile " ::= Grammar (\n" sau " ::= PushDownAutomata (\n", 
- in fiecare situatie afisandu-se numele automatului/gramaticii (memorat anterior 
- cu yymore()), iar apoi se trece fie in starea AUTOMAT, fie in starea
- GRAMATICA. In aceste stari se identifica elementele din definitia automatului/
- gramaticii, pe baza altor stari exclusive asociate fiecarui element care trebuie 
- identificat si a sirurilor prezente in formatul prezentat (nonterminals, alphabet, 
- start_symbol pentru gramatica, respectiv alphabet, stack_alphabet, states, 
- final_states, initial_states pentru automat).
+ match pe sirurile " ::= Grammar (\n" sau " ::= PushDownAutomata (\n" (identifica
+ te prin regulile aferente din starea GASESTE_NUME), in fiecare situatie afisandu-se 
+ numele automatului/gramaticii (memorat anterior cu yymore()), iar apoi se trece fie 
+ in starea AUTOMAT, fie in starea GRAMATICA. In aceste stari se identifica elementele 
+ din definitia automatului/gramaticii, pe baza altor stari exclusive asociate fiecarui 
+ element care trebuie identificat si a sirurilor prezente in formatul prezentat 
+ (nonterminals, alphabet, start_symbol pentru gramatica, respectiv alphabet, 
+ stack_alphabet, states, final_states, initial_states pentru automat).
 
  ---------------------------------------------------------------------------------
  ->Detalii despre parsarea si afisarea automatelor cu stiva
