@@ -8,7 +8,7 @@ grammar1 ::= Grammar (
 	%productii:
 	S -> y&S | a&S1 ;
 	S1 -> b&S2 | e ;
-	%S2 -> S1&a&S2 | y ; productie ignorata->gramatica regultata
+	%S2 -> S1&a&S2 | y ; productie ignorata->gramatica va fi regulata
 	S2 -> a&S2 | y ;
 ) ;;
 
@@ -39,9 +39,10 @@ automata5 ::= PushDownAutomata (
 	alphabet :: { a, b } ; %comentariu
 	%states :: { q1 } ;
 	states :: { q0 } ;
-	initial_state :: q0 ; 
+	/*initial_state :: q0 ; */
 	stack_alphabet :: { Z0, 0, 1 } ;
-	variable y ::= { a, b } ;
+	initial_state :: q1 ;
+	variable y ::= { b } ;
 	variable u ::= { b, a } ;
 	
 	q0 -> ( 

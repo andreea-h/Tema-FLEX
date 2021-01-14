@@ -130,8 +130,8 @@ grammar8 ::= Grammar (
 	start_symbol :: S ;
 	
 	S -> a&S&d | A | b&C&d ;
-	A -> a&A&c | B ;
-	B -> b&B&c | e ; /*acesta este un comentariu*/
+	A -> a&A&c | B ; /*acesta este un comentariu*/
+	B -> b&B&c | e ;
 	C -> b&C&d | B ;
 ) ;;
 
@@ -152,10 +152,11 @@ automata0 ::= PushDownAutomata (
 		e, Z0 / e -> q0 ;
 		a, X / X&X -> q0 ;
 		b, X / X&X -> q0 ;
-		y, Y / Y&Y -> q0 ; 
+		y, Y / Y&Y -> q0 ; /*y va fi extins cu valorile c si a*/
 	) ;
 ) ;;
 
+/* definitie de automat comentata
 % Automat pentru a^n c b^n cu n >= 1 si acceptare prin stari finale
 automata1 ::= PushDownAutomata (
 	alphabet :: { a, b, c } ;
@@ -185,8 +186,35 @@ automata1 ::= PushDownAutomata (
 		b, a / e -> q3 ;%comment2
 	) ;
 ) ;;
+*/
 
+% GFR
+grammar9 ::= Grammar (
+	nonterminals :: { S, S1 } ;
+	alphabet :: { a, b } ;
+	start_symbol :: S ;
+	
+	S -> a&S1&a | b&S1&b ;
+	S1&S -> a&S1 | b&S1 | e ; %gramatica va fi fara restrictii(apare S1&S->e)
+	S1 -> a&S1 | b&S1 | e ;
+) ;;
 
+% GFR
+grammar10 ::= Grammar (
+	nonterminals :: { S, T, A, B, C } ;
+	alphabet :: { a, b, c } ;
+	start_symbol :: S ;
+	
+	%apare tranzitia S->e dar S nu mai apare in partea dreapta a nici unei alte productii
+	S -> e ; /*simbolul de start respecta conditia de caz special de la GDC*/
+	T -> a&B&C | a&B&A&S ;
+	C&B -> B&C ;
+	a&B -> a&b&A ;
+	b&B -> b&b ;
+	c&C -> c&C ;
+	A -> e ; /*gramatica va fi una fara restricii*/
+	b&C -> b&c ;
+) ;;
 
 
 

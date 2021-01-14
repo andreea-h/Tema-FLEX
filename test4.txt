@@ -5,7 +5,8 @@ grammar1 ::= Grammar (
 	alphabet :: { a, b, c } ;
 	start_symbol :: S ;
 	
-	S -> a&a&B&C | a&b&C | e ;
+	S -> a&a&B&C | a&b&C ;
+	S -> e ;
 	C&B -> B&C ;
 	b&B -> b&b ;
 	b&C -> b&c ;
@@ -94,13 +95,13 @@ grammar3 ::= Grammar (
 	alphabet :: { a, b, c } ;
 	start_symbol :: S ;
 	
-	S -> a&a&B&C | e | a&b&C ;
-	C&B -> B&C ;
+	C&B -> B&C&S ;
 	b&B -> b&b ;
-	b&C -> S&b&c ; %COMENTARIU
+	b&C -> b&c ; %COMENTARIU
 	/*S apare in partea dreapta a unei productii->GFR*/
 	c&B -> B&c ;
 	c&C -> c&c ;
+	S -> a&a&B&C | e ;
 ) ;;
 
 % Definitie automat cu stiva

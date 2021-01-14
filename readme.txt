@@ -133,10 +133,13 @@ facem match pe "|" verificam daca st > dr, caz in care am putea deduce ca
 gramatica este GFR, oprind analiza. Daca pentru toate productiile gasim ca 
 st <= dr, putem incheia afisand ca gramatica este GDC.
 	Am tratat in mod special cazul in care la GDC poate aparea productia S->e, 
-cu conditia ca S sa nu mai apara in partea dreapta a nici unei alte productii.
-Pentru aceasta, a fost nevoie mai intai sa identific prezenta simbolului de start
-la stanga unei productii, si apoi sa verific daca "e" apare in partea dreapta 
-a acelei productii. De asemenea, a fost nevoie sa contorizez aparitiile simbolului
+cu conditia ca S, simbolul de start, sa nu mai apara in partea dreapta a nici unei 
+alte productii. Pentru aceasta, a fost nevoie mai intai sa identific prezenta 
+simbolului de start la stanga unei productii (memorand acest lucru prin 
+variabila exceptie_productie), si apoi sa verific daca "e" apare in partea dreapta 
+a acelei productii (daca este identificata tranzitia S->e , variabila caz_special
+devine true).
+	De asemenea, a fost nevoie sa contorizez aparitiile simbolului
 de start in partea dreapta a productiilor pentru a verifica ulterior, in cazul in 
 care s-a identificat productia S->e, ca numarul de aparitii al lui S in partea 
 dreapta a productiilor este 0.
@@ -172,13 +175,7 @@ la identificarea exceptiei si semnificatia fiecareia.
 --------------------------------------------------------------------------------
 Delatii despre platforma pe care am realizat tema:
 	Am rulat tema pe Linux, versiunea Ubuntu 20.04.1, versiunea de gcc 
-folosita este [gcc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0] iat versiunea flex
+folosita este [gcc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0], iar versiunea flex
 este [flex 2.6.4].
 
---------------------------------------------------------------------------------
-Observatii finale
-	Am incercat sa organizez codul cat mai bine dar pe masura ce descopeream 
-noi cazuri la input care trebuiau tratate, regulile se complicau din ce in ce 
-mai mult. Am adaugat in cod mai multe comentarii pentru a descrie operatiile 
-efectuate.
 
